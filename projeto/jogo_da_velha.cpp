@@ -117,8 +117,12 @@ Jogada jogador_joga(char jogador) {
 		}	
 	} while(linha < 0 || linha > 2 || coluna < 0 || coluna > 2);
 	
-	// warning: extended initializer lists only available with -std=c++11 or -std=gnu++11
-	return {linha, coluna, jogador};
+	Jogada result;
+	result.linha = linha;
+	result.coluna = coluna;
+	result.jogador = jogador;
+	return result;
+	
 }
 
 void marca_no_tabuleiro(Jogada jogada) {
