@@ -38,6 +38,7 @@
 
 #define JOGADOR_X 'X'
 #define JOGADOR_O 'O'
+#define VAZIO '-'
 
 typedef struct _jogada_ {
 	int linha;
@@ -47,9 +48,9 @@ typedef struct _jogada_ {
 
 // variáveis globais são marcantes na programação estruturada
 char tabuleiro[TAM][TAM] = 
-	{'-', '-', '-',
-	 '-', '-', '-',
-	 '-', '-', '-'
+	{VAZIO, VAZIO, VAZIO,
+	 VAZIO, VAZIO, VAZIO,
+	 VAZIO, VAZIO, VAZIO
 	};
 
 char turno(char jogador);
@@ -65,6 +66,7 @@ char verifica_vitoria(char jogador);
 int main() {
 	
 	char vencedor = CHAR_FALSO;
+	
 	imprime_tabuleiro();
 	
 	turno(JOGADOR_X);
@@ -86,7 +88,7 @@ int main() {
 
 void imprime_tabuleiro() {
 	
-	printf("   0   1   2\n");
+	printf("%4c %3c %3c \n", '0', '1', '2');
 	for(int i=0; i < TAM; i++) {
 		printf("%d", i);
 		for(int j=0; j < TAM; j++) {
@@ -114,8 +116,12 @@ Jogada jogador_joga(char jogador) {
 		if (linha < 0 || linha > 2 || coluna < 0 || coluna > 2) {
 			printf("   Padrao: linha<espaco>coluna\n");
 			printf("      0 0\n      1 2\n      2 0\n\n");
-		}	
-	} while(linha < 0 || linha > 2 || coluna < 0 || coluna > 2);
+		} else if (tabuleiro[linha][coluna] != VAZIO) {
+			printf("   Invalido: Espaco ocupado!\n");
+		}
+	} while(linha < 0 || linha > 2 || 
+			coluna < 0 || coluna > 2 || 
+			tabuleiro[linha][coluna] != VAZIO);
 	
 	Jogada result;
 	result.linha = linha;
@@ -175,10 +181,3 @@ char verifica_vitoria(char jogador) {
 	return CHAR_FALSO;
 	
 }
-
-
-
-
-
-
-
