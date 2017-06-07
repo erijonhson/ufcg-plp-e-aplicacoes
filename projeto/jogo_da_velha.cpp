@@ -40,12 +40,6 @@
 #define JOGADOR_O 'O'
 #define VAZIO '-'
 
-typedef struct _jogada_ {
-	int linha;
-	int coluna;
-	char jogador;
-} Jogada;
-
 // variáveis globais são marcantes na programação estruturada
 char tabuleiro[TAM][TAM] = 
 	{VAZIO, VAZIO, VAZIO,
@@ -57,9 +51,7 @@ char turno(char jogador);
 
 void imprime_tabuleiro();
 
-Jogada jogador_joga(char jogador);
-
-void marca_no_tabuleiro(Jogada jogada);
+void jogador_joga(char jogador);
 
 char verifica_vitoria(char jogador);
 
@@ -100,13 +92,13 @@ void imprime_tabuleiro() {
 }
 
 char turno(char jogador) {
-	marca_no_tabuleiro(jogador_joga(jogador));
+	jogador_joga(jogador);
 	char vencedor = verifica_vitoria(jogador);
 	imprime_tabuleiro();
 	return vencedor;
 }
 
-Jogada jogador_joga(char jogador) {
+void jogador_joga(char jogador) {
 	
 	int linha, coluna;
 	
@@ -123,19 +115,8 @@ Jogada jogador_joga(char jogador) {
 			coluna < 0 || coluna > 2 || 
 			tabuleiro[linha][coluna] != VAZIO);
 	
-	Jogada result;
-	result.linha = linha;
-	result.coluna = coluna;
-	result.jogador = jogador;
-	return result;
+	tabuleiro[linha][coluna] = jogador;
 	
-}
-
-void marca_no_tabuleiro(Jogada jogada) {
-	if (jogada.linha >= 0 && jogada.linha < TAM &&
-		jogada.coluna >= 0 && jogada.coluna < TAM) {
-			tabuleiro[jogada.linha][jogada.coluna] = jogada.jogador;
-	}
 }
 
 char verifica_vitoria(char jogador) {
