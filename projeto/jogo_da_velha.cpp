@@ -32,6 +32,9 @@
 
 #include<stdio.h>
 #include<stdlib.h>
+#include<string.h>
+#include "solucao_jogo_da_velha.hpp"
+
 
 #define TAM 3
 #define CHAR_FALSO '\0'
@@ -53,6 +56,8 @@ void imprime_tabuleiro();
 
 void jogador_joga(char jogador);
 
+Posicao processa_entrada(char jogador);
+
 char verifica_vitoria(char jogador);
 
 int main() {
@@ -73,7 +78,7 @@ int main() {
 	if (vencedor) {
 		printf("Parabens %c voce venceu!\n", vencedor);
 	} else {
-		printf("Deu velha!");
+		puts("Deu velha!");
 	}
 	
 }
@@ -102,20 +107,29 @@ void jogador_joga(char jogador) {
 	
 	int linha, coluna;
 	
-	do {
-		printf("Joga %c [lin col]: ", jogador);
-		scanf("%d %d", &linha, &coluna);
-		if (linha < 1 || linha > 3 || coluna < 1 || coluna > 3) {
-			printf("   Padrao: linha<espaco>coluna\n");
-			printf("      1 0\n      1 2\n      2 0\n\n");
-		} else if (tabuleiro[linha-1][coluna-1] != VAZIO) {
-			printf("   Invalido: Espaco ocupado!\n");
-		}
-	} while(linha < 1 || linha > 3 || 
-			coluna < 1 || coluna > 3 || 
-			tabuleiro[linha-1][coluna-1] != VAZIO);
+	puts("\nmenu 1. Ganhar: se voce tem duas pecas numa linha, ponha a terceira.");
+	puts("menu 2. Bloquear: se o oponente tiver duas pecas em linha.");
+	puts("menu 3. Triangulo: crie uma oportunidade para ganhar de duas maneiras.");
+	puts("menu 41. Bloquear o Triangulo do oponente colocando 2 pecas em linha.");
+	puts("menu 42. bloquear formacao de Triangulo do oponente.");
+	puts("menu 5. Jogue no centro.\n");
 	
-	tabuleiro[linha-1][coluna-1] = jogador;
+	do {
+		Posicao posicao = processa_entrada(jogador);
+		if (posicao.linha != -1) { 
+			linha = posicao.linha;
+			coluna = posicao.coluna;
+			if (tabuleiro[linha][coluna] != VAZIO) {
+				printf("   Invalido: Espaco ocupado!\n");
+			}
+		} else {
+			puts("   Menu momentaneamente invalido.");
+		}
+	} while(linha < 0 || linha > 2 || 
+			coluna < 0 || coluna > 2 || 
+			tabuleiro[linha][coluna] != VAZIO);
+	
+	tabuleiro[linha][coluna] = jogador;
 	
 }
 
@@ -161,4 +175,54 @@ char verifica_vitoria(char jogador) {
 	
 	return CHAR_FALSO;
 	
+}
+
+/* Processa entrada, chama menu adequado ou recupera linha e coluna indicados.
+ * Retorna posição (-1, -1) em caso de erro.
+ * */
+Posicao processa_entrada(char jogador) {
+	
+	Posicao posicao = {-1, -1};
+	char entrada[10];
+
+	printf("Joga %c [lin col] ou [menu X]: ", jogador);
+	scanf(" %[^\n]s", entrada);
+	
+	// chamar menu 1
+	if (strcmp("menu 1", entrada) == 0) {
+		
+		posicao = ganhar(tabuleiro, jogador);
+		
+	}
+	
+	// menus 2, 3 e 4 serão parecidos com menu 1
+	
+	// chamar menu 2
+	else if (strcmp("menu 5", entrada) == 0) {
+		
+		bool conseguiu = jogar_no_centro(tabuleiro, jogador);
+		if (!conseguiu) {
+			posicao.linha = 1;
+			posicao.coluna = 1;
+		}
+		
+	// jogou linha e coluna
+	} else if ((entrada[0] == '1' || entrada[0] == '2' || entrada[0] == '3') &&
+				(entrada[2] == '1' || entrada[2] == '2' || entrada[2] == '3') &&
+				(entrada[1] == ' ')) {
+		
+		if (entrada[0] == '1') posicao.linha = 0;
+		else if (entrada[0] == '2') posicao.linha = 1;
+		else if (entrada[0] == '3') posicao.linha = 2;
+		if (entrada[2] == '1') posicao.coluna = 0;
+		else if (entrada[2] == '2') posicao.coluna = 1;
+		else if (entrada[2] == '3') posicao.coluna = 2;
+		
+	// jogou errado
+	} else {
+		puts("   Padrao: [lin col] ou [menu X]");
+		puts("      1 1\n      2 3\n      menu 5");
+	}
+	
+	return posicao;
 }
