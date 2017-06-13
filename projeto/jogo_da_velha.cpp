@@ -80,9 +80,9 @@ int main() {
 
 void imprime_tabuleiro() {
 	
-	printf("%4c %3c %3c \n", '0', '1', '2');
+	printf("%4c %3c %3c \n", '1', '2', '3');
 	for(int i=0; i < TAM; i++) {
-		printf("%d", i);
+		printf("%d", i+1);
 		for(int j=0; j < TAM; j++) {
 			printf("%3c ", tabuleiro[i][j]);
 		}
@@ -105,17 +105,17 @@ void jogador_joga(char jogador) {
 	do {
 		printf("Joga %c [lin col]: ", jogador);
 		scanf("%d %d", &linha, &coluna);
-		if (linha < 0 || linha > 2 || coluna < 0 || coluna > 2) {
+		if (linha < 1 || linha > 3 || coluna < 1 || coluna > 3) {
 			printf("   Padrao: linha<espaco>coluna\n");
-			printf("      0 0\n      1 2\n      2 0\n\n");
-		} else if (tabuleiro[linha][coluna] != VAZIO) {
+			printf("      1 0\n      1 2\n      2 0\n\n");
+		} else if (tabuleiro[linha-1][coluna-1] != VAZIO) {
 			printf("   Invalido: Espaco ocupado!\n");
 		}
-	} while(linha < 0 || linha > 2 || 
-			coluna < 0 || coluna > 2 || 
-			tabuleiro[linha][coluna] != VAZIO);
+	} while(linha < 1 || linha > 3 || 
+			coluna < 1 || coluna > 3 || 
+			tabuleiro[linha-1][coluna-1] != VAZIO);
 	
-	tabuleiro[linha][coluna] = jogador;
+	tabuleiro[linha-1][coluna-1] = jogador;
 	
 }
 
