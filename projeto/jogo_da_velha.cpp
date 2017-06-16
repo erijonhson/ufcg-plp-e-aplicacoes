@@ -36,23 +36,19 @@
 #include "solucao_jogo_da_velha.hpp"
 
 
-#define TAM 3
-#define CHAR_FALSO '\0'
-
-#define JOGADOR_X 'X'
-#define JOGADOR_O 'O'
-#define VAZIO '-'
-
 // variáveis globais são marcantes na programação estruturada
 char tabuleiro[TAM][TAM] = 
-	{VAZIO, VAZIO, VAZIO,
-	 VAZIO, VAZIO, VAZIO,
-	 VAZIO, VAZIO, VAZIO
+	{
+		VAZIO, VAZIO, VAZIO,
+		VAZIO, VAZIO, VAZIO,
+		VAZIO, VAZIO, VAZIO
 	};
 
-char turno(char jogador);
+void imprime_menu();
 
 void imprime_tabuleiro();
+
+char turno(char jogador);
 
 void jogador_joga(char jogador);
 
@@ -85,6 +81,7 @@ int main() {
 
 void imprime_tabuleiro() {
 	
+	puts("--- JOGO DA VELHA ---\n");
 	printf("%4c %3c %3c \n", '1', '2', '3');
 	for(int i=0; i < TAM; i++) {
 		printf("%d", i+1);
@@ -107,12 +104,7 @@ void jogador_joga(char jogador) {
 	
 	int linha, coluna;
 	
-	puts("\nmenu 1. Ganhar: se voce tem duas pecas numa linha, ponha a terceira.");
-	puts("menu 2. Bloquear: se o oponente tiver duas pecas em linha.");
-	puts("menu 3. Triangulo: crie uma oportunidade para ganhar de duas maneiras.");
-	puts("menu 41. Bloquear o Triangulo do oponente colocando 2 pecas em linha.");
-	puts("menu 42. bloquear formacao de Triangulo do oponente.");
-	puts("menu 5. Jogue no centro.\n");
+	imprime_menu();
 	
 	do {
 		Posicao posicao = processa_entrada(jogador);
@@ -160,21 +152,45 @@ char verifica_vitoria(char jogador) {
 	}
 	
 	// diagonal principal
-	if ((tabuleiro[0][0] == jogador) &&
-		(tabuleiro[0][0] == tabuleiro[1][1]) && 
-		(tabuleiro[1][1] == tabuleiro[2][2])) {
-			return jogador;
+	bool vitorioso = true;
+	for(int i=0; i < TAM; i++) {
+		if (tabuleiro[i][i] != jogador) {
+			vitorioso = false;
+			break;
+		}
 	}
+	
+	if (vitorioso)
+		return jogador;
 	
 	// diagonal secundária
-	if ((tabuleiro[0][2] == jogador) &&
-		(tabuleiro[0][2] == tabuleiro[1][1]) && 
-		(tabuleiro[1][1] == tabuleiro[2][0])) {
-			return jogador;
+	vitorioso = true;
+	for(int i=0; i < TAM; i++) {
+		for(int j=0; j < TAM; j++) {
+			if ((i+j) != (TAM - 1))
+				continue;
+			if (tabuleiro[i][j] != jogador) {
+				vitorioso = false;
+				break;
+			}
+		}
+		if (!vitorioso)
+			break;
 	}
 	
-	return CHAR_FALSO;
+	if (vitorioso)
+		return jogador;
 	
+	return CHAR_FALSO;
+}
+
+void imprime_menu() {
+	puts("\nmenu 1. Ganhar: se voce tem duas pecas numa linha, ponha a terceira.");
+	puts("menu 2. Bloquear: se o oponente tiver duas pecas em linha.");
+	puts("menu 3. Triangulo: crie uma oportunidade para ganhar de duas maneiras.");
+	puts("menu 41. Bloquear o Triangulo do oponente colocando 2 pecas em linha.");
+	puts("menu 42. bloquear formacao de Triangulo do oponente.");
+	puts("menu 5. Jogue no centro.\n");
 }
 
 /* Processa entrada, chama menu adequado ou recupera linha e coluna indicados.
@@ -194,9 +210,14 @@ Posicao processa_entrada(char jogador) {
 		posicao = ganhar(tabuleiro, jogador);
 		
 	}
-	
 	// menus 2, 3 e 4 serão parecidos com menu 1
 	
+	// chamar menu 3
+	else if (strcmp("menu 3", entrada) == 0) {
+		
+		posicao = triangulo(tabuleiro, jogador);
+		
+	}
 	// chamar menu 2
 	else if (strcmp("menu 5", entrada) == 0) {
 		
