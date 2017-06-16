@@ -168,20 +168,16 @@ int verifica_possibilidades(char tabuleiro[TAM][TAM], char jogador) {
 	return quant_possibilidades;
 }
 
-/* Função para fazer jogador jogar no centro do jogo da velha recebido como parâmetro. 
+/* Função que retorna posicao central do tabuleiro.
  * 
- * Retorna falso caso não seja possível concluir a jogada.
+ * Retorna (1, 1).
  * 
  * @param tabuleiro[3][3]	Representação do tabuleiro 
  * @param jogador			Representação do jogador da vez 
  * */
-bool jogar_no_centro(char tabuleiro[TAM][TAM], char jogador) {
-	if (tabuleiro[1][1] == VAZIO) {
-		tabuleiro[1][1] = jogador;
-		return true;
-	} else {
-		return false;
-	}
+Posicao jogar_no_centro(char tabuleiro[TAM][TAM], char jogador) {
+	Posicao posicao = {1, 1};
+	return posicao;
 }
 
 #endif

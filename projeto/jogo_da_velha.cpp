@@ -221,11 +221,7 @@ Posicao processa_entrada(char jogador) {
 	// chamar menu 2
 	else if (strcmp("menu 5", entrada) == 0) {
 		
-		bool conseguiu = jogar_no_centro(tabuleiro, jogador);
-		if (!conseguiu) {
-			posicao.linha = 1;
-			posicao.coluna = 1;
-		}
+		posicao = jogar_no_centro(tabuleiro, jogador);
 		
 	// jogou linha e coluna
 	} else if ((entrada[0] == '1' || entrada[0] == '2' || entrada[0] == '3') &&

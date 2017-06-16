@@ -45,13 +45,14 @@ Posicao ganhar(char tabuleiro[TAM][TAM], char jogador);
  * */
 Posicao triangulo(char tabuleiro[TAM][TAM], char jogador);
 
-/* Função para fazer jogador jogar no centro do jogo da velha recebido como parâmetro. 
- * Retorna falso caso não seja possível concluir a jogada.
+/* Função que retorna posicao central do tabuleiro.
+ * 
+ * Retorna (1, 1).
  * 
  * @param tabuleiro[3][3]	Representação do tabuleiro 
  * @param jogador			Representação do jogador da vez 
  * */
-bool jogar_no_centro(char tabuleiro[TAM][TAM], char jogador);
+Posicao jogar_no_centro(char tabuleiro[TAM][TAM], char jogador);
 
 
 #include "solucao_jogo_da_velha.cpp"
