@@ -79,7 +79,8 @@ int main() {
 		printf("Parabens, jogador %c! Voce venceu!\n", vencedor);
 		printf("\n");
 		jogar_novamente();
-	} else {
+	} 
+		else {
 		puts("Deu velha!");
 		printf("\n");
 		jogar_novamente();
