@@ -59,11 +59,17 @@ Posicao* posicoes_para_vitoria_proxima_jogada(char tabuleiro[TAM][TAM], char jog
  * */
 Posicao ganhar(char tabuleiro[TAM][TAM], char jogador) {
 	
-	Posicao posicao = {1, 1};
-	// procurar lugar para jogador ganhar
-	// retornar posicao onde o jogador ganha ou (-1, -1)
+	Posicao posicao_vitoria={-1,-1};
 	
-	return posicao;
+	Posicao *posicoes = posicoes_para_vitoria_proxima_jogada(tabuleiro, jogador);
+	
+	if(posicoes[0].linha !=-1){
+		posicao_vitoria = posicoes[0];
+	
+	}
+	free(posicoes);	
+	
+	return posicao_vitoria;
 }
  
 /* Função para verificar e indicar próxima jogada de jogador para obter um 

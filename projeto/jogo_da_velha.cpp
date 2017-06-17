@@ -240,6 +240,7 @@ Posicao processa_entrada(char jogador) {
 	if (strcmp("menu 1", entrada) == 0) {
 		
 		posicao = ganhar(tabuleiro, jogador);
+		//printf("\n\n%d %d\n\n", posicao.linha, posicao.coluna);
 		
 	}
 	// menus 2, 3 e 4 serão parecidos com menu 1
