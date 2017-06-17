@@ -29,13 +29,13 @@
  * * Opção 2: se existe uma configuração em que o oponente pode formar um triângulo, bloqueiem-no.
  * 5. Centro: jogue no centro.
 */
-
+ 
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
 #include "solucao_jogo_da_velha.hpp"
-
-
+ 
+ 
 // variáveis globais são marcantes na programação estruturada
 char tabuleiro[TAM][TAM] = 
 	{
@@ -43,23 +43,23 @@ char tabuleiro[TAM][TAM] =
 		VAZIO, VAZIO, VAZIO,
 		VAZIO, VAZIO, VAZIO
 	};
-
+ 
 void imprime_menu();
-
+ 
 void imprime_tabuleiro();
-
+ 
 char turno(char jogador);
-
+ 
 void jogador_joga(char jogador);
-
+ 
 Posicao processa_entrada(char jogador);
 
 void jogar_novamente();
 
 void limpa_tabuleiro();
-
+ 
 char verifica_vitoria(char jogador);
-
+ 
 int main() {
 	
 	char vencedor = CHAR_FALSO;
@@ -67,7 +67,7 @@ int main() {
 	imprime_tabuleiro();
 	
 	turno(JOGADOR_X);
-		
+	
 	for (int i=0; i < TAM * TAM - 1; i+=2) {
 		vencedor = turno(JOGADOR_O);
 		if (vencedor) break;
@@ -79,10 +79,7 @@ int main() {
 		printf("Parabens, jogador %c! Voce venceu!\n", vencedor);
 		printf("\n");
 		jogar_novamente();
-
-		
-	}
-	 else {
+	} else {
 		puts("Deu velha!");
 		printf("\n");
 		jogar_novamente();
@@ -112,9 +109,7 @@ void jogar_novamente () {
 	else {
 	}
 }
-
-
-
+ 
 void imprime_tabuleiro() {
 	
 	puts("--- JOGO DA VELHA ---\n");
@@ -128,14 +123,14 @@ void imprime_tabuleiro() {
 	}
 	
 }
-
+ 
 char turno(char jogador) {
 	jogador_joga(jogador);
 	char vencedor = verifica_vitoria(jogador);
 	imprime_tabuleiro();
 	return vencedor;
 }
-
+ 
 void jogador_joga(char jogador) {
 	
 	int linha, coluna;
@@ -160,7 +155,7 @@ void jogador_joga(char jogador) {
 	tabuleiro[linha][coluna] = jogador;
 	
 }
-
+ 
 char verifica_vitoria(char jogador) {
 	
 	// linhas
@@ -219,7 +214,7 @@ char verifica_vitoria(char jogador) {
 	
 	return CHAR_FALSO;
 }
-
+ 
 void imprime_menu() {
 	puts("\nmenu 1. Ganhar: se voce tem duas pecas numa linha, ponha a terceira.");
 	puts("menu 2. Bloquear: se o oponente tiver duas pecas em linha.");
@@ -228,7 +223,7 @@ void imprime_menu() {
 	puts("menu 42. bloquear formacao de Triangulo do oponente.");
 	puts("menu 5. Jogue no centro.\n");
 }
-
+ 
 /* Processa entrada, chama menu adequado ou recupera linha e coluna indicados.
  * Retorna posição (-1, -1) em caso de erro.
  * */
@@ -236,7 +231,7 @@ Posicao processa_entrada(char jogador) {
 	
 	Posicao posicao = {-1, -1};
 	char entrada[10];
-
+ 
 	printf("Joga %c [lin col] ou [menu X]: ", jogador);
 	scanf(" %[^\n]s", entrada);
 	
@@ -254,7 +249,7 @@ Posicao processa_entrada(char jogador) {
 		posicao = triangulo(tabuleiro, jogador);
 		
 	}
-	// chamar menu 2
+	// chamar menu 5
 	else if (strcmp("menu 5", entrada) == 0) {
 		
 		posicao = jogar_no_centro(tabuleiro, jogador);
@@ -279,3 +274,4 @@ Posicao processa_entrada(char jogador) {
 	
 	return posicao;
 }
+ 

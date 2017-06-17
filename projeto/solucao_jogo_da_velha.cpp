@@ -5,7 +5,7 @@
  * 			Pedro Costa
  * 			Victor Farias 
  * */
-
+ 
 #ifdef __SOLUCAO_JOGO_DA_VELHA_HPP__
 	
 	// templated code, inline functions
@@ -15,7 +15,7 @@
 	// non-templated code
 	
 #include "solucao_jogo_da_velha.hpp"
-
+ 
 /* Método auxiliar para verificar quantas possibilidades o jogador tem para
  * ganhar em sua próxima jogada.
  * 
@@ -26,7 +26,28 @@
  * @param jogador			Representação do jogador da vez 
  * */
 int verifica_possibilidades(char tabuleiro[TAM][TAM], char jogador);
-
+ 
+/* Verifica se há duas marcações de um mesmo jogador e uma marcação de vazio
+ * em mesma direção, o que configura possível vitória na próxima jogada.
+ * 
+ * Retorna true caso exista possibilidade do jogador ganhar, false caso contrário.
+ *
+ * @param quant_jogador		quantas vezes jogador está marcado na direção 
+ * @param quant_vazio		quantas vezes vazio está marcado na direção 
+ * */
+bool jogador_ganhara_na_proxima_jogada(int quant_jogador, int quant_vazio);
+ 
+/* Método auxiliar para calcular posições para vitória de jogador
+ * em sua próxima jogada.
+ * 
+ * Retorna vetor[TAM] de posições em que o jogador ganha na próxima jogada.
+ * Última posição do vetor é marcada com (-1, -1).
+ * 
+ * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
+ * @param jogador			Representação do jogador da vez 
+ * */
+Posicao* posicoes_para_vitoria_proxima_jogada(char tabuleiro[TAM][TAM], char jogador);
+ 
 /* Função para verificar e fazer última jogada de jogador no 
  * jogo da velha recebido como parâmetro. 
  * 
@@ -44,7 +65,7 @@ Posicao ganhar(char tabuleiro[TAM][TAM], char jogador) {
 	
 	return posicao;
 }
-
+ 
 /* Função para verificar e indicar próxima jogada de jogador para obter um 
  * triângulo (oportunidade em que jogador poderá ganhar de duas maneiras). 
  * 
@@ -62,10 +83,10 @@ Posicao triangulo(char tabuleiro[TAM][TAM], char jogador) {
 	for(int i=0; i < TAM; i++) {
 		for(int j=0; j < TAM; j++) {
 			if (tabuleiro[i][j] == VAZIO) {
-				tabuleiro[i][j] = jogador;
+				tabuleiro[i][j] = jogador; // marca para testes
 				int possibilidades = verifica_possibilidades(tabuleiro, jogador);
 				tabuleiro[i][j] = VAZIO; // reseta jogada
-				if (possibilidades >= 2) {
+				if (possibilidades >= 2) { // condição de triângulo
 					posicao.linha = i;
 					posicao.coluna = j;
 					return posicao;
@@ -76,11 +97,19 @@ Posicao triangulo(char tabuleiro[TAM][TAM], char jogador) {
 	
 	return posicao;
 }
-
-bool jogador_ganhara_na_proxima_jogada(int quant_jogador, int quant_vazio) {
-	return (quant_jogador == 2) && (quant_vazio == 1);
+ 
+/* Função que retorna posicao central do tabuleiro.
+ * 
+ * Retorna (1, 1).
+ * 
+ * @param tabuleiro[3][3]	Representação do tabuleiro 
+ * @param jogador			Representação do jogador da vez 
+ * */
+Posicao jogar_no_centro(char tabuleiro[TAM][TAM], char jogador) {
+	Posicao posicao = {1, 1};
+	return posicao;
 }
-
+ 
 /* Método auxiliar para verificar quantas possibilidades o jogador tem para
  * ganhar em sua próxima jogada.
  * 
@@ -91,10 +120,48 @@ bool jogador_ganhara_na_proxima_jogada(int quant_jogador, int quant_vazio) {
  * @param jogador			Representação do jogador da vez 
  * */
 int verifica_possibilidades(char tabuleiro[TAM][TAM], char jogador) {
+	Posicao *posicoes = posicoes_para_vitoria_proxima_jogada(tabuleiro, jogador);
+	int quantidade = 0;
+	for(int i=0; i < TAM; i++) {
+		if (posicoes[i].linha == -1) 
+			break;
+		quantidade++;
+	}
+	return quantidade;
+}
+ 
+/* Verifica se há duas marcações de um mesmo jogador e uma marcação de vazio
+ * em mesma direção, o que configura possível vitória na próxima jogada.
+ * 
+ * Retorna true caso exista possibilidade do jogador ganhar, false caso contrário.
+ *
+ * @param quant_jogador		quantas vezes jogador está marcado na direção 
+ * @param quant_vazio		quantas vezes vazio está marcado na direção 
+ * */
+bool jogador_ganhara_na_proxima_jogada(int quant_jogador, int quant_vazio) {
+	return (quant_jogador == 2) && (quant_vazio == 1);
+}
+ 
+/* Método auxiliar para calcular posições para vitória de jogador
+ * em sua próxima jogada.
+ * 
+ * Retorna vetor[TAM] de posições em que o jogador ganha na próxima jogada.
+ * Última posição do vetor é marcada com (-1, -1).
+ * 
+ * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
+ * @param jogador			Representação do jogador da vez 
+ * */
+Posicao* posicoes_para_vitoria_proxima_jogada(char tabuleiro[TAM][TAM], char jogador) {
 	
-	int quant_possibilidades = 0;
+	int index = 0;
+	Posicao posicao = {-1, -1};
+	Posicao *posicoes = (Posicao *) malloc(TAM * sizeof(Posicao));
 	int quant_jogador = 0;
 	int quant_vazio = 0;
+	
+	for(int i=0; i < TAM; i++) {
+		posicoes[i] = posicao;
+	}
 	
 	// linhas
 	for(int i=0; i < TAM; i++) {
@@ -103,11 +170,13 @@ int verifica_possibilidades(char tabuleiro[TAM][TAM], char jogador) {
 				quant_jogador++;
 			} else if (tabuleiro[i][j] == VAZIO) {
 				quant_vazio++;
+				posicao.linha = i;
+				posicao.coluna = j;
 			}
 		}
 		
 		if (jogador_ganhara_na_proxima_jogada(quant_jogador, quant_vazio)) {
-			quant_possibilidades++;
+			posicoes[index++] = posicao;
 		}
 		
 		quant_jogador = 0;
@@ -121,11 +190,13 @@ int verifica_possibilidades(char tabuleiro[TAM][TAM], char jogador) {
 				quant_jogador++;
 			} else if (tabuleiro[j][i] == VAZIO) {
 				quant_vazio++;
+				posicao.linha = j;
+				posicao.coluna = i;
 			}
 		}
 		
 		if (jogador_ganhara_na_proxima_jogada(quant_jogador, quant_vazio)) {
-			quant_possibilidades++;
+			posicoes[index++] = posicao;
 		}
 		
 		quant_jogador = 0;
@@ -138,11 +209,13 @@ int verifica_possibilidades(char tabuleiro[TAM][TAM], char jogador) {
 			quant_jogador++;
 		} else if (tabuleiro[i][i] == VAZIO) {
 			quant_vazio++;
+			posicao.linha = i;
+			posicao.coluna = i;
 		}
 	}
 	
 	if (jogador_ganhara_na_proxima_jogada(quant_jogador, quant_vazio)) {
-		quant_possibilidades++;
+			posicoes[index++] = posicao;
 	}
 	
 	quant_jogador = 0;
@@ -157,27 +230,23 @@ int verifica_possibilidades(char tabuleiro[TAM][TAM], char jogador) {
 				quant_jogador++;
 			} else if (tabuleiro[i][j] == VAZIO) {
 				quant_vazio++;
+				posicao.linha = i;
+				posicao.coluna = j;
 			}
 		}
 	}
 	
 	if (jogador_ganhara_na_proxima_jogada(quant_jogador, quant_vazio)) {
-		quant_possibilidades++;
+			posicoes[index++] = posicao;
 	}
+ 
+	// garantir o contrato da função
+	posicao.linha = -1;
+	posicao.coluna = -1;
+	posicoes[TAM - 1] = posicao;
 	
-	return quant_possibilidades;
+	return posicoes;
 }
-
-/* Função que retorna posicao central do tabuleiro.
- * 
- * Retorna (1, 1).
- * 
- * @param tabuleiro[3][3]	Representação do tabuleiro 
- * @param jogador			Representação do jogador da vez 
- * */
-Posicao jogar_no_centro(char tabuleiro[TAM][TAM], char jogador) {
-	Posicao posicao = {1, 1};
-	return posicao;
-}
-
+ 
 #endif
+ 
