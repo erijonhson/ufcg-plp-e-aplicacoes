@@ -54,6 +54,10 @@ void jogador_joga(char jogador);
 
 Posicao processa_entrada(char jogador);
 
+void jogar_novamente();
+
+void limpa_tabuleiro();
+
 char verifica_vitoria(char jogador);
 
 int main() {
@@ -63,7 +67,7 @@ int main() {
 	imprime_tabuleiro();
 	
 	turno(JOGADOR_X);
-	
+		
 	for (int i=0; i < TAM * TAM - 1; i+=2) {
 		vencedor = turno(JOGADOR_O);
 		if (vencedor) break;
@@ -72,12 +76,44 @@ int main() {
 	}
 	
 	if (vencedor) {
-		printf("Parabens %c voce venceu!\n", vencedor);
-	} else {
+		printf("Parabens, jogador %c! Voce venceu!\n", vencedor);
+		printf("\n");
+		jogar_novamente();
+
+		
+	}
+	 else {
 		puts("Deu velha!");
+		printf("\n");
+		jogar_novamente();
 	}
 	
 }
+
+void limpa_tabuleiro () {
+	for (int i = 0; i < TAM; i++) {
+		for (int j = 0; j < TAM; j++) {
+			tabuleiro[i][j] = VAZIO;
+			}
+		}
+	main();	
+}
+
+void jogar_novamente () {
+	int resposta;
+	printf("Deseja jogar outra partida?\n");
+	printf("1 - Sim | 0 - Nao\n");
+	scanf("%d", &resposta);
+	if (resposta == 1) {
+			limpa_tabuleiro();
+		}
+	else if (resposta == 0) {
+		}
+	else {
+	}
+}
+
+
 
 void imprime_tabuleiro() {
 	
