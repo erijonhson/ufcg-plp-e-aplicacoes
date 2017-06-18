@@ -44,6 +44,8 @@ char tabuleiro[TAM][TAM] =
 		VAZIO, VAZIO, VAZIO
 	};
  
+void nova_partida(); 
+
 void imprime_menu();
  
 void imprime_tabuleiro();
@@ -62,7 +64,35 @@ char verifica_vitoria(char jogador);
  
 int main() {
 	
+	int resposta;
+	
+	do {
+		
+		nova_partida();
+		
+		puts("Deseja jogar outra partida?");
+		printf("   1 - Sim | 0 - Nao: ");
+		
+		do {
+			
+			scanf("%d", &resposta);
+			
+			if (resposta != 0 && resposta != 1) {
+				printf("   Resposta invalida! Escolha jogar (1) ou sair (0): ");
+			}
+			
+		} while(resposta != 0 && resposta != 1);
+		
+	} while(resposta != 0);
+	
+	return 0;
+}
+
+void nova_partida() {
+	
 	char vencedor = CHAR_FALSO;
+	
+	limpa_tabuleiro();
 	
 	imprime_tabuleiro();
 	
@@ -78,36 +108,17 @@ int main() {
 	if (vencedor) {
 		printf("Parabens, jogador %c! Voce venceu!\n", vencedor);
 		printf("\n");
-		jogar_novamente();
-	} 
-		else {
+	} else {
 		puts("Deu velha!");
 		printf("\n");
-		jogar_novamente();
 	}
-	
 }
 
-void limpa_tabuleiro () {
+void limpa_tabuleiro() {
 	for (int i = 0; i < TAM; i++) {
 		for (int j = 0; j < TAM; j++) {
 			tabuleiro[i][j] = VAZIO;
-			}
 		}
-	main();	
-}
-
-void jogar_novamente () {
-	int resposta;
-	printf("Deseja jogar outra partida?\n");
-	printf("1 - Sim | 0 - Nao\n");
-	scanf("%d", &resposta);
-	if (resposta == 1) {
-			limpa_tabuleiro();
-		}
-	else if (resposta == 0) {
-		}
-	else {
 	}
 }
  
@@ -240,10 +251,8 @@ Posicao processa_entrada(char jogador) {
 	if (strcmp("menu 1", entrada) == 0) {
 		
 		posicao = ganhar(tabuleiro, jogador);
-		//printf("\n\n%d %d\n\n", posicao.linha, posicao.coluna);
 		
 	}
-	// menus 2, 3 e 4 serão parecidos com menu 1
 	
 	//chamar menu 2
 	else if (strcmp("menu 2", entrada) == 0) {
@@ -254,6 +263,20 @@ Posicao processa_entrada(char jogador) {
 	else if (strcmp("menu 3", entrada) == 0) {
 		
 		posicao = triangulo(tabuleiro, jogador);
+		
+	}
+	
+	// chamar menu 41
+	else if (strcmp("menu 41", entrada) == 0) {
+		
+		posicao = bloquear_triangulo_com_ofensiva(tabuleiro, jogador);
+		
+	}
+	
+		// chamar menu 42
+	else if (strcmp("menu 42", entrada) == 0) {
+		
+		posicao = bloquear_triangulo(tabuleiro, jogador);
 		
 	}
 	// chamar menu 5

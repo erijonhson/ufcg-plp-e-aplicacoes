@@ -5,6 +5,7 @@ valor_maximo
 sem_duplicacoes
 primo_casado
 jogo_da_velha
+.DS_Store
 
 # ------------------------------------------------------------------ CPP
 # Prerequisites

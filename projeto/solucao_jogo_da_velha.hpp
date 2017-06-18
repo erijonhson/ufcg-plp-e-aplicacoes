@@ -24,23 +24,25 @@ typedef struct _posicao_ {
 } Posicao;
 
 
-/* Função para verificar e indicar última jogada para jogador ganhar no 
+/* Função para verificar e fazer última jogada de jogador no 
  * jogo da velha recebido como parâmetro. 
- * Retorna Tabuleiro de Jogo da Velha com última jogada para vencer adicionada ou 
- * mesmo tabuleiro, caso não exista jogada que faça jogador vencer.
  * 
- * @param tabuleiro[3][3]	Representação do tabuleiro 
- * @param jogador			Representação do jogador da vez 
+ * Retorna Posição Válida (i,j) com última jogada para vencer adicionada 
+ * (-1, -1), caso não exista jogada que faça jogador vencer. 
+ * 
+ * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
+ * @param jogador				Representação do jogador da vez 
  * */
 Posicao ganhar(char tabuleiro[TAM][TAM], char jogador);
 
-/* Função para verificar e indicar última jogada para jogador bloquear a
- * vitória do adversário no jogo da velha recebido como parâmetro. 
- * Retorna Tabuleiro de Jogo da Velha com última jogada para bloquear adicionada ou 
- * mesmo tabuleiro, caso não exista jogada que realize o bloqueio.
+/* Função para verificar e indicar jogada para jogador bloquear a
+ * vitória do adversário no jogo da velha recebido como parâmetro.
  * 
- * @param tabuleiro[3][3]	Representação do tabuleiro 
- * @param jogador			Representação do jogador da vez 
+ * Retorna Posição de última jogada para bloquear adversário ou 
+ * (-1, -1), caso não exista jogada que realize o bloqueio.
+ * 
+ * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
+ * @param jogador				Representação do jogador da vez 
  * */
 Posicao bloquear(char tabuleiro[TAM][TAM], char jogador);
 
@@ -50,17 +52,40 @@ Posicao bloquear(char tabuleiro[TAM][TAM], char jogador);
  * Retorna Posição Válida (i,j) com jogada para obter um triângulo ou 
  * (-1, -1), caso não exista jogada para obter um triângulo. 
  * 
- * @param tabuleiro[3][3]	Representação do tabuleiro 
+ * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
  * @param jogador			Representação do jogador da vez 
  * */
 Posicao triangulo(char tabuleiro[TAM][TAM], char jogador);
 
+/* Função para verificar e bloquear possível triângulo que o oponente de 
+ * jogador possa construir. Nesse caso, o bloqueio será mediante ofensiva ao
+ * oponente, caso em que este deve defender-se.
+ * 
+ * Retorna Posição Válida (i,j) com jogada para forçar oponente a defender-se 
+ * (-1, -1), caso não exista jogada para tanto. 
+ * 
+ * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
+ * @param jogador			Representação do jogador da vez 
+ * */
+Posicao bloquear_triangulo_com_ofensiva(char tabuleiro[TAM][TAM], char jogador);
+
+/* Função para verificar e bloquear possível triângulo que o oponente de 
+ * jogador possa construir. 
+ * 
+ * Retorna Posição Válida (i,j) com jogada para bloquear triângulo ou 
+ * (-1, -1), caso não exista jogada para tanto. 
+ * 
+ * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
+ * @param jogador			Representação do jogador da vez 
+ * */
+Posicao bloquear_triangulo(char tabuleiro[TAM][TAM], char jogador);
+
 /* Função que retorna posicao central do tabuleiro.
  * 
- * Retorna (1, 1).
+ * Retorna posicao central do tabuleiro.
  * 
- * @param tabuleiro[3][3]	Representação do tabuleiro 
- * @param jogador			Representação do jogador da vez 
+ * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
+ * @param jogador				Representação do jogador da vez 
  * */
 Posicao jogar_no_centro(char tabuleiro[TAM][TAM], char jogador);
 

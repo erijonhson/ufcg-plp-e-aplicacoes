@@ -16,17 +16,45 @@
 	
 #include "solucao_jogo_da_velha.hpp"
  
-/* Método auxiliar para verificar quantas possibilidades o jogador tem para
+/* Função auxiliar para verificar quantas possibilidades o jogador tem para
  * ganhar em sua próxima jogada.
  * 
  * Retorna quantidade de possibilidades que o jogador tem para ganhar na próxima
  * jogada.
  * 
- * @param tabuleiro[3][3]	Representação do tabuleiro 
- * @param jogador			Representação do jogador da vez 
+ * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
+ * @param jogador				Representação do jogador da vez 
  * */
 int verifica_possibilidades(char tabuleiro[TAM][TAM], char jogador);
- 
+
+/* Função auxiliar para recuperar oponente de jogador.
+ * 
+ * Retorna oponente de jogador.
+ * 
+ * @param jogador				Representação do jogador da vez 
+ * */
+char recupera_oponente(char jogador);
+
+/* Verifica se jogador tem apenas uma jogada em algum dos cantos do tabuleiro.
+ * 
+ * Retorna true caso jogador tenha apenas uma jogada e esta é em um dos cantos. 
+ * false caso contrário. 
+ * 
+ * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
+ * @param jogador				Representação do jogador da vez 
+ * */
+int uma_jogada_no_canto(char tabuleiro[TAM][TAM], char jogador);
+
+/* Verifica se determinado par (int, int) representa posicao de canto do tabuleiro.
+ * 
+ * Retorna true caso (int, int) represente canto do tabuleiro.
+ * false caso contrário.
+ * 
+ * @param linha da posicao
+ * @param coluna da posicao
+ * */
+bool posicao_eh_canto(int linha, int coluna);
+
 /* Verifica se há duas marcações de um mesmo jogador e uma marcação de vazio
  * em mesma direção, o que configura possível vitória na próxima jogada.
  * 
@@ -44,7 +72,7 @@ bool jogador_ganhara_na_proxima_jogada(int quant_jogador, int quant_vazio);
  * Última posição do vetor é marcada com (-1, -1).
  * 
  * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
- * @param jogador			Representação do jogador da vez 
+ * @param jogador				Representação do jogador da vez 
  * */
 Posicao* posicoes_para_vitoria_proxima_jogada(char tabuleiro[TAM][TAM], char jogador);
  
@@ -54,19 +82,19 @@ Posicao* posicoes_para_vitoria_proxima_jogada(char tabuleiro[TAM][TAM], char jog
  * Retorna Posição Válida (i,j) com última jogada para vencer adicionada 
  * (-1, -1), caso não exista jogada que faça jogador vencer. 
  * 
- * @param tabuleiro[3][3]	Representação do tabuleiro 
- * @param jogador			Representação do jogador da vez 
+ * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
+ * @param jogador				Representação do jogador da vez 
  * */
 Posicao ganhar(char tabuleiro[TAM][TAM], char jogador) {
 	
-	Posicao posicao_vitoria={-1,-1};
+	Posicao posicao_vitoria = {-1,-1};
 	
 	Posicao *posicoes = posicoes_para_vitoria_proxima_jogada(tabuleiro, jogador);
 	
 	if(posicoes[0].linha !=-1){
 		posicao_vitoria = posicoes[0];
-	
 	}
+	
 	free(posicoes);	
 	
 	return posicao_vitoria;
@@ -77,19 +105,16 @@ Posicao ganhar(char tabuleiro[TAM][TAM], char jogador) {
  * Retorna Tabuleiro de Jogo da Velha com última jogada para bloquear adicionada ou 
  * mesmo tabuleiro, caso não exista jogada que realize o bloqueio.
  * 
- * @param tabuleiro[3][3]	Representação do tabuleiro 
- * @param jogador			Representação do jogador da vez 
+ * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
+ * @param jogador				Representação do jogador da vez 
  * */
 Posicao bloquear(char tabuleiro[TAM][TAM], char jogador) {
-	Posicao posicao_bloqueio={-1,-1};
 	
-	Posicao *posicoes = (Posicao *) malloc(TAM * sizeof(Posicao));
+	Posicao posicao_bloqueio = {-1,-1};
 	
-	if (JOGADOR_O == jogador) {
-		posicoes = posicoes_para_vitoria_proxima_jogada(tabuleiro, JOGADOR_X);
-	} else {
-		posicoes = posicoes_para_vitoria_proxima_jogada(tabuleiro, JOGADOR_O);
-	}
+	char oponente = recupera_oponente(jogador);
+	
+	Posicao *posicoes = posicoes_para_vitoria_proxima_jogada(tabuleiro, oponente);
 	
 	if(posicoes[0].linha != -1) {
 		posicao_bloqueio = posicoes[0];
@@ -106,12 +131,18 @@ Posicao bloquear(char tabuleiro[TAM][TAM], char jogador) {
  * Retorna Posição Válida (i,j) com jogada para obter um triângulo ou 
  * (-1, -1), caso não exista jogada para obter um triângulo. 
  * 
- * @param tabuleiro[3][3]	Representação do tabuleiro 
- * @param jogador			Representação do jogador da vez 
+ * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
+ * @param jogador				Representação do jogador da vez 
  * */
 Posicao triangulo(char tabuleiro[TAM][TAM], char jogador) {
 	
 	Posicao posicao = {-1, -1};
+	
+	// verifica se eh necessário defender-se
+	posicao = bloquear(tabuleiro, jogador);
+	if (posicao.linha != -1) {
+		return posicao;
+	}
 	
 	// varre todo o jogo da velha
 	for(int i=0; i < TAM; i++) {
@@ -131,27 +162,79 @@ Posicao triangulo(char tabuleiro[TAM][TAM], char jogador) {
 	
 	return posicao;
 }
- 
-/* Função que retorna posicao central do tabuleiro.
+
+/* Função para verificar e bloquear possível triângulo que o oponente de 
+ * jogador possa construir. Nesse caso, o bloqueio será mediante ofensiva ao
+ * oponente, caso em que este deve defender-se.
  * 
- * Retorna (1, 1).
+ * Retorna Posição Válida (i,j) com jogada para forçar oponente a defender-se 
+ * (-1, -1), caso não exista jogada para tanto. 
  * 
- * @param tabuleiro[3][3]	Representação do tabuleiro 
+ * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
  * @param jogador			Representação do jogador da vez 
  * */
+Posicao bloquear_triangulo_com_ofensiva(char tabuleiro[TAM][TAM], char jogador) {
+	
+	// verifica se eh necessário defender-se
+	Posicao posicao = bloquear(tabuleiro, jogador);
+	if (posicao.linha != -1) {
+		return posicao;
+	}
+	
+	return posicao;
+}
+
+/* Função para verificar e bloquear possível triângulo que o oponente de 
+ * jogador possa construir. 
+ * 
+ * Retorna Posição Válida (i,j) com jogada para bloquear triângulo ou 
+ * (-1, -1), caso não exista jogada para tanto. 
+ * 
+ * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
+ * @param jogador			Representação do jogador da vez 
+ * */
+Posicao bloquear_triangulo(char tabuleiro[TAM][TAM], char jogador) {
+	
+	// verifica se eh necessário defender-se
+	Posicao posicao = bloquear(tabuleiro, jogador);
+	if (posicao.linha != -1) {
+		return posicao;
+	}
+	
+	// analisa situação do oponente --------------------------------------------
+	char oponente = recupera_oponente(jogador);
+	
+	// se oponente fez jogada no canto, se defenda no centro 
+	if (uma_jogada_no_canto(tabuleiro, oponente)) {
+		return jogar_no_centro(tabuleiro, oponente);
+	}
+	
+	
+	
+	return posicao;
+}
+
+/* Função que retorna posicao central do tabuleiro.
+ * 
+ * Retorna posicao central do tabuleiro.
+ * 
+ * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
+ * @param jogador				Representação do jogador da vez 
+ * */
 Posicao jogar_no_centro(char tabuleiro[TAM][TAM], char jogador) {
-	Posicao posicao = {1, 1};
+	int meio = (int) TAM / 2;
+	Posicao posicao = {meio, meio};
 	return posicao;
 }
  
-/* Método auxiliar para verificar quantas possibilidades o jogador tem para
+/* Função auxiliar para verificar quantas possibilidades o jogador tem para
  * ganhar em sua próxima jogada.
  * 
  * Retorna quantidade de possibilidades que o jogador tem para ganhar na próxima
  * jogada.
  * 
- * @param tabuleiro[3][3]	Representação do tabuleiro 
- * @param jogador			Representação do jogador da vez 
+ * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
+ * @param jogador				Representação do jogador da vez 
  * */
 int verifica_possibilidades(char tabuleiro[TAM][TAM], char jogador) {
 	Posicao *posicoes = posicoes_para_vitoria_proxima_jogada(tabuleiro, jogador);
@@ -161,9 +244,62 @@ int verifica_possibilidades(char tabuleiro[TAM][TAM], char jogador) {
 			break;
 		quantidade++;
 	}
+	free(posicoes);
 	return quantidade;
 }
- 
+
+/* Função auxiliar para recuperar oponente de jogador.
+ * 
+ * Retorna oponente de jogador.
+ * 
+ * @param jogador				Representação do jogador da vez 
+ * */
+char recupera_oponente(char jogador) {
+	return jogador == JOGADOR_O ? JOGADOR_X : JOGADOR_O;
+}
+
+/* Verifica se jogador tem apenas uma jogada em algum dos cantos do tabuleiro.
+ * 
+ * Retorna true caso jogador tenha apenas uma jogada e esta é em um dos cantos. 
+ * false caso contrário. 
+ * 
+ * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
+ * @param jogador				Representação do jogador da vez 
+ * */
+int uma_jogada_no_canto(char tabuleiro[TAM][TAM], char jogador) {
+	
+	int quant = 0;
+	bool no_canto = false;
+	
+	for(int i=0; i < TAM; i++) {
+		for(int j=0; j < TAM; j++) {
+			if (tabuleiro[i][j] == jogador) {
+				quant++;
+				if (posicao_eh_canto(i, j))
+					no_canto = true;
+			}
+		}
+	}
+	
+	return quant == 1;
+}
+
+/* Verifica se determinado par (int, int) representa posicao de canto do tabuleiro.
+ * 
+ * Retorna true caso (int, int) represente canto do tabuleiro.
+ * false caso contrário.
+ * 
+ * @param linha da posicao
+ * @param coluna da posicao
+ * */
+bool posicao_eh_canto(int linha, int coluna) {
+	int beira = TAM - 1;
+	return (linha == 0 && coluna == 0) ||
+			(linha == 0 && coluna == beira) ||
+			(linha == beira && coluna == 0) ||
+			(linha == beira && coluna == beira);
+}
+
 /* Verifica se há duas marcações de um mesmo jogador e uma marcação de vazio
  * em mesma direção, o que configura possível vitória na próxima jogada.
  * 
@@ -175,15 +311,17 @@ int verifica_possibilidades(char tabuleiro[TAM][TAM], char jogador) {
 bool jogador_ganhara_na_proxima_jogada(int quant_jogador, int quant_vazio) {
 	return (quant_jogador == 2) && (quant_vazio == 1);
 }
- 
+
 /* Método auxiliar para calcular posições para vitória de jogador
  * em sua próxima jogada.
  * 
  * Retorna vetor[TAM] de posições em que o jogador ganha na próxima jogada.
  * Última posição do vetor é marcada com (-1, -1).
  * 
+ * Obs.: Após usar o vetor retornado, desaloque-o com free().
+ * 
  * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
- * @param jogador			Representação do jogador da vez 
+ * @param jogador				Representação do jogador da vez 
  * */
 Posicao* posicoes_para_vitoria_proxima_jogada(char tabuleiro[TAM][TAM], char jogador) {
 	
