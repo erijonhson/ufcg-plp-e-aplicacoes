@@ -34,6 +34,16 @@ typedef struct _posicao_ {
  * */
 Posicao ganhar(char tabuleiro[TAM][TAM], char jogador);
 
+/* Função para verificar e indicar última jogada para jogador bloquear a
+ * vitória do adversário no jogo da velha recebido como parâmetro. 
+ * Retorna Tabuleiro de Jogo da Velha com última jogada para bloquear adicionada ou 
+ * mesmo tabuleiro, caso não exista jogada que realize o bloqueio.
+ * 
+ * @param tabuleiro[3][3]	Representação do tabuleiro 
+ * @param jogador			Representação do jogador da vez 
+ * */
+Posicao bloquear(char tabuleiro[TAM][TAM], char jogador);
+
 /* Função para verificar e indicar próxima jogada de jogador para obter um 
  * triângulo (oportunidade em que jogador poderá ganhar de duas maneiras). 
  * 

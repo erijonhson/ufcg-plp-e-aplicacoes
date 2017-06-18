@@ -245,6 +245,11 @@ Posicao processa_entrada(char jogador) {
 	}
 	// menus 2, 3 e 4 serão parecidos com menu 1
 	
+	//chamar menu 2
+	if (strcmp("menu 2", entrada) == 0) {
+		posicao = bloquear(tabuleiro, jogador);
+	}
+	
 	// chamar menu 3
 	else if (strcmp("menu 3", entrada) == 0) {
 		

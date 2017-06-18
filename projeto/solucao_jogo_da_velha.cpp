@@ -71,6 +71,34 @@ Posicao ganhar(char tabuleiro[TAM][TAM], char jogador) {
 	
 	return posicao_vitoria;
 }
+
+/* Função para verificar e indicar última jogada para jogador bloquear a
+ * vitória do adversário no jogo da velha recebido como parâmetro. 
+ * Retorna Tabuleiro de Jogo da Velha com última jogada para bloquear adicionada ou 
+ * mesmo tabuleiro, caso não exista jogada que realize o bloqueio.
+ * 
+ * @param tabuleiro[3][3]	Representação do tabuleiro 
+ * @param jogador			Representação do jogador da vez 
+ * */
+Posicao bloquear(char tabuleiro[TAM][TAM], char jogador) {
+	Posicao posicao_bloqueio={-1,-1};
+	
+	Posicao *posicoes = (Posicao *) malloc(TAM * sizeof(Posicao));
+	
+	if (JOGADOR_O == jogador) {
+		posicoes = posicoes_para_vitoria_proxima_jogada(tabuleiro, JOGADOR_X);
+	} else {
+		posicoes = posicoes_para_vitoria_proxima_jogada(tabuleiro, JOGADOR_O);
+	}
+	
+	if(posicoes[0].linha != -1) {
+		posicao_bloqueio = posicoes[0];
+	}
+	
+	free(posicoes);
+	
+	return posicao_bloqueio;
+}
  
 /* Função para verificar e indicar próxima jogada de jogador para obter um 
  * triângulo (oportunidade em que jogador poderá ganhar de duas maneiras). 
