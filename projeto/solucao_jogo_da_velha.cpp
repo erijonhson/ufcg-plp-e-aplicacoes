@@ -55,6 +55,14 @@ Posicao uma_jogada_no_canto(char tabuleiro[TAM][TAM], char jogador);
  * */
 bool posicao_eh_canto(int linha, int coluna);
 
+/* Função para verificar se a configuração atual do tabuleiro é propícia para
+ * oponente conseguir criar um triângulo em suas próximas jogadas.
+ * 
+ * Retorna true, caso seja possível; falso, caso contrário.
+ * 
+ * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
+ * @param oponente				Representação do oponente da vez 
+ * */
 bool oponente_consegue_triangulo(char tabuleiro[TAM][TAM], char oponente);
 
 /* Verifica se há duas marcações de um mesmo jogador e uma marcação de vazio
@@ -102,10 +110,11 @@ Posicao ganhar(char tabuleiro[TAM][TAM], char jogador) {
 	return posicao_vitoria;
 }
 
-/* Função para verificar e indicar última jogada para jogador bloquear a
- * vitória do adversário no jogo da velha recebido como parâmetro. 
- * Retorna Tabuleiro de Jogo da Velha com última jogada para bloquear adicionada ou 
- * mesmo tabuleiro, caso não exista jogada que realize o bloqueio.
+/* Função para verificar e indicar jogada para jogador bloquear a
+ * vitória do adversário no jogo da velha recebido como parâmetro.
+ * 
+ * Retorna Posição para bloquear adversário ou  (-1, -1), caso não exista 
+ * jogada que realize o bloqueio.
  * 
  * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
  * @param jogador				Representação do jogador da vez 
@@ -134,7 +143,7 @@ Posicao bloquear(char tabuleiro[TAM][TAM], char jogador) {
  * (-1, -1), caso não exista jogada para obter um triângulo. 
  * 
  * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
- * @param jogador				Representação do jogador da vez 
+ * @param jogador			Representação do jogador da vez 
  * */
 Posicao triangulo(char tabuleiro[TAM][TAM], char jogador) {
 	
@@ -200,6 +209,7 @@ Posicao bloquear_triangulo_com_ofensiva(char tabuleiro[TAM][TAM], char jogador) 
 				Posicao *posicoes = posicoes_para_vitoria_proxima_jogada(tabuleiro, jogador);
 				if (posicoes[0].linha == -1) {
 					tabuleiro[i][j] = VAZIO; // reseta jogada
+					free(posicoes);
 					continue;
 				}
 				bool consegue = oponente_consegue_triangulo(tabuleiro, oponente);
@@ -355,6 +365,14 @@ bool posicao_eh_canto(int linha, int coluna) {
 			(linha == beira && coluna == beira);
 }
 
+/* Função para verificar se a configuração atual do tabuleiro é propícia para
+ * oponente conseguir criar um triângulo em suas próximas jogadas.
+ * 
+ * Retorna true, caso seja possível; falso, caso contrário.
+ * 
+ * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
+ * @param oponente				Representação do oponente da vez 
+ * */
 bool oponente_consegue_triangulo(char tabuleiro[TAM][TAM], char oponente) {
 	
 	// verifica se eh necessário defender-se

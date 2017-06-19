@@ -38,8 +38,8 @@ Posicao ganhar(char tabuleiro[TAM][TAM], char jogador);
 /* Função para verificar e indicar jogada para jogador bloquear a
  * vitória do adversário no jogo da velha recebido como parâmetro.
  * 
- * Retorna Posição de última jogada para bloquear adversário ou 
- * (-1, -1), caso não exista jogada que realize o bloqueio.
+ * Retorna Posição para bloquear adversário ou  (-1, -1), caso não exista 
+ * jogada que realize o bloqueio.
  * 
  * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
  * @param jogador				Representação do jogador da vez 
