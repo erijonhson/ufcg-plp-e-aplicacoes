@@ -37,13 +37,13 @@ char recupera_oponente(char jogador);
 
 /* Verifica se jogador tem apenas uma jogada em algum dos cantos do tabuleiro.
  * 
- * Retorna true caso jogador tenha apenas uma jogada e esta é em um dos cantos. 
- * false caso contrário. 
+ * Retorna posicao caso jogador tenha apenas uma jogada e no canto. 
+ * (-1, -1) caso contrário. 
  * 
  * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
  * @param jogador				Representação do jogador da vez 
  * */
-int uma_jogada_no_canto(char tabuleiro[TAM][TAM], char jogador);
+Posicao uma_jogada_no_canto(char tabuleiro[TAM][TAM], char jogador);
 
 /* Verifica se determinado par (int, int) representa posicao de canto do tabuleiro.
  * 
@@ -54,6 +54,8 @@ int uma_jogada_no_canto(char tabuleiro[TAM][TAM], char jogador);
  * @param coluna da posicao
  * */
 bool posicao_eh_canto(int linha, int coluna);
+
+bool oponente_consegue_triangulo(char tabuleiro[TAM][TAM], char oponente);
 
 /* Verifica se há duas marcações de um mesmo jogador e uma marcação de vazio
  * em mesma direção, o que configura possível vitória na próxima jogada.
@@ -175,10 +177,41 @@ Posicao triangulo(char tabuleiro[TAM][TAM], char jogador) {
  * */
 Posicao bloquear_triangulo_com_ofensiva(char tabuleiro[TAM][TAM], char jogador) {
 	
-	// verifica se eh necessário defender-se
+		// verifica se eh necessário defender-se
 	Posicao posicao = bloquear(tabuleiro, jogador);
 	if (posicao.linha != -1) {
 		return posicao;
+	}
+	
+	// analisa situação do oponente --------------------------------------------
+	char oponente = recupera_oponente(jogador);
+	
+	// se oponente fez primeira jogada no canto, se defenda no centro 
+	posicao = uma_jogada_no_canto(tabuleiro, oponente);
+	if (posicao.linha != -1) {
+		return jogar_no_centro(tabuleiro, jogador);
+	}
+	
+	// varre todo o jogo da velha
+	for(int i=0; i < TAM; i++) {
+		for(int j=0; j < TAM; j++) {
+			if (tabuleiro[i][j] == VAZIO) {
+				tabuleiro[i][j] = jogador; // marca para testes
+				Posicao *posicoes = posicoes_para_vitoria_proxima_jogada(tabuleiro, jogador);
+				if (posicoes[0].linha == -1) {
+					tabuleiro[i][j] = VAZIO; // reseta jogada
+					continue;
+				}
+				bool consegue = oponente_consegue_triangulo(tabuleiro, oponente);
+				tabuleiro[i][j] = VAZIO; // reseta jogada
+				if (!consegue) { // evita triângulo
+					posicao.linha = i;
+					posicao.coluna = j;
+					return posicao;
+				}
+				free(posicoes);
+			}
+		}
 	}
 	
 	return posicao;
@@ -204,12 +237,27 @@ Posicao bloquear_triangulo(char tabuleiro[TAM][TAM], char jogador) {
 	// analisa situação do oponente --------------------------------------------
 	char oponente = recupera_oponente(jogador);
 	
-	// se oponente fez jogada no canto, se defenda no centro 
-	if (uma_jogada_no_canto(tabuleiro, oponente)) {
-		return jogar_no_centro(tabuleiro, oponente);
+	// se oponente fez primeira jogada no canto, se defenda no centro 
+	posicao = uma_jogada_no_canto(tabuleiro, oponente);
+	if (posicao.linha != -1) {
+		return jogar_no_centro(tabuleiro, jogador);
 	}
 	
-	
+	// varre todo o jogo da velha
+	for(int i=0; i < TAM; i++) {
+		for(int j=0; j < TAM; j++) {
+			if (tabuleiro[i][j] == VAZIO) {
+				tabuleiro[i][j] = jogador; // marca para testes
+				bool consegue = oponente_consegue_triangulo(tabuleiro, oponente);
+				tabuleiro[i][j] = VAZIO; // reseta jogada
+				if (!consegue) { // evita triângulo
+					posicao.linha = i;
+					posicao.coluna = j;
+					return posicao;
+				}
+			}
+		}
+	}
 	
 	return posicao;
 }
@@ -260,28 +308,35 @@ char recupera_oponente(char jogador) {
 
 /* Verifica se jogador tem apenas uma jogada em algum dos cantos do tabuleiro.
  * 
- * Retorna true caso jogador tenha apenas uma jogada e esta é em um dos cantos. 
- * false caso contrário. 
+ * Retorna posicao caso jogador tenha apenas uma jogada e no canto. 
+ * (-1, -1) caso contrário. 
  * 
  * @param tabuleiro[TAM][TAM]	Representação do tabuleiro 
  * @param jogador				Representação do jogador da vez 
  * */
-int uma_jogada_no_canto(char tabuleiro[TAM][TAM], char jogador) {
+Posicao uma_jogada_no_canto(char tabuleiro[TAM][TAM], char jogador) {
 	
 	int quant = 0;
-	bool no_canto = false;
+	Posicao posicao = {-1, -1};
 	
 	for(int i=0; i < TAM; i++) {
 		for(int j=0; j < TAM; j++) {
 			if (tabuleiro[i][j] == jogador) {
 				quant++;
-				if (posicao_eh_canto(i, j))
-					no_canto = true;
+				if (posicao_eh_canto(i, j)) {
+					posicao.linha = i;
+					posicao.coluna = j;
+				}
 			}
 		}
 	}
 	
-	return quant == 1;
+	if (quant != 1) {
+		posicao.linha = -1;
+		posicao.coluna = -1;
+	}
+	
+	return posicao;
 }
 
 /* Verifica se determinado par (int, int) representa posicao de canto do tabuleiro.
@@ -298,6 +353,28 @@ bool posicao_eh_canto(int linha, int coluna) {
 			(linha == 0 && coluna == beira) ||
 			(linha == beira && coluna == 0) ||
 			(linha == beira && coluna == beira);
+}
+
+bool oponente_consegue_triangulo(char tabuleiro[TAM][TAM], char oponente) {
+	
+	// verifica se eh necessário defender-se
+	Posicao posicao = bloquear(tabuleiro, oponente);
+	if (posicao.linha != -1) {
+		tabuleiro[posicao.linha][posicao.coluna] = oponente;
+		int possibilidades = verifica_possibilidades(tabuleiro, oponente);
+		tabuleiro[posicao.linha][posicao.coluna] = VAZIO;
+		if (possibilidades >= 2)
+			return true;
+		else
+			return false;
+	}
+	
+	posicao = triangulo(tabuleiro, oponente);
+	
+	if (posicao.linha == -1)
+		return false;
+	else
+		return true;
 }
 
 /* Verifica se há duas marcações de um mesmo jogador e uma marcação de vazio
