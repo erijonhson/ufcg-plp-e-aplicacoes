@@ -43,6 +43,8 @@ char tabuleiro[TAM][TAM] =
 		VAZIO, VAZIO, VAZIO,
 		VAZIO, VAZIO, VAZIO
 	};
+	
+void inicia_jogo();
  
 void nova_partida(); 
 
@@ -64,28 +66,57 @@ char verifica_vitoria(char jogador);
  
 int main() {
 	
-	int resposta;
+	int inicio_de_jogo;
+	
+	printf("Bem-vindos ao Jogo da Velha!\n");
+	printf("\n");
+	printf("As regras sao bem simples:\n");
+	printf("O jogo consiste de um tabuleiro, sendo este uma matriz de tres linhas e tres colunas.\n");
+	printf("Sao 2 participantes (O e X). Um comeca o jogo e um joga apos o outro, ate o fim do jogo.\n");
+	printf("Em cada jogada e colocado um simbolo ('O' ou 'X') em uma posicao nao ocupada do tabuleiro.\n");
+	printf("No inicio do jogo, todas as posicoes do tabuleiro estao livres/desocupadas.\n");
+	printf("O jogo termina quando se forma uma sequencia de tres simbolos do mesmo tipo em linha horizontal, vertical ou diagonal.\n");
+	printf("Quando isto acontece, o jogador que colocou o simbolo ganha o jogo (e o outro perde)\n");
+	printf("O jogo tambem pode terminar quando alguem preenche o ultimo espaco disponível (neste caso quem ganha e a 'velha').\n");
+	printf("\n");
+	printf("Pressione 1 para iniciar ou qualquer outra tecla para fechar o jogo.\n");
+	scanf("%d", &inicio_de_jogo);
+	
+	if (inicio_de_jogo == 1) {
+		printf("\n");
+		inicia_jogo();
+	}
+	else {}	
+	
+	return 0;
+}
+
+void inicia_jogo() {
+
+	char resposta[10];
 	
 	do {
 		
+		printf("\n");
+
 		nova_partida();
 		
 		puts("Deseja jogar outra partida?");
-		printf("   1 - Sim | 0 - Nao: ");
+		printf("   s - Sim | n - Nao: ");
 		
 		do {
 			
-			scanf("%d", &resposta);
+			scanf(" %[^\n]s", resposta);	
 			
-			if (resposta != 0 && resposta != 1) {
-				printf("   Resposta invalida! Escolha jogar (1) ou sair (0): ");
+			if (strcmp("s", resposta) != 0 && strcmp("n", resposta) != 0) {
+				printf("   Resposta invalida! Escolha jogar (s) ou sair (n): ");
 			}
 			
-		} while(resposta != 0 && resposta != 1);
+		} while(strcmp("s", resposta) != 0 && strcmp("n", resposta) != 0);
 		
-	} while(resposta != 0);
+	} while(strcmp("n", resposta) != 0);
 	
-	return 0;
+	
 }
 
 void nova_partida() {
