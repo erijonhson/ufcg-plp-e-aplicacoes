@@ -52,8 +52,7 @@ instrucoes = do
     putStrLn "No inicio do jogo, todas as posicoes do tabuleiro estao livres/desocupadas."
     putStrLn "O jogo termina quando se forma uma sequencia de tres simbolos do mesmo tipo em linha horizontal, vertical ou diagonal."
     putStrLn "Quando isto acontece, o jogador que colocou o simbolo ganha o jogo (e o outro perde)"
-    putStrLn "O jogo tambem pode terminar quando alguem preenche o ultimo espaco disponível (neste caso quem ganha e a 'velha').\n"
-    putStrLn "Pressione qualquer tecla para iniciar o jogo.\n\n"
+    putStrLn "O jogo tambem pode terminar quando alguem preenche o ultimo espaco disponível (neste caso quem ganha e a 'velha').\n\n"
 
 menu :: IO ()
 menu = do
@@ -64,27 +63,6 @@ menu = do
     putStrLn "menu 42. bloquear formacao de Triangulo do oponente."
     putStrLn "menu 5. Jogue no centro.\n"
 
-{-
-imprimeTabuleiro :: [String] -> IO ()
-imprimeTabuleiro tabuleiro = do
-    let lin = 1
-    let col = 1
-    putStrLn "--- JOGO DA VELHA ---\n"
-    putStr "    1   2   3\n1"
-    imprimeTabuleiroRecursivamente tabuleiro lin col
-
-imprimeTabuleiroRecursivamente :: [String] -> Int -> Int -> IO ()
-imprimeTabuleiroRecursivamente [] lin col = putStr ""
-imprimeTabuleiroRecursivamente (cabeca:corpo) lin col = do
-    if col == 4 then do
-       putStrLn ("")
-       putStr (show(lin+1) ++ "   " ++ cabeca)
-       imprimeTabuleiroRecursivamente corpo (lin+1) 2
-    else do
-       putStr ("   " ++ cabeca) 
-       imprimeTabuleiroRecursivamente corpo lin (col + 1)
--}
-
 imprimeTabuleiro :: Array (Int, Int) String -> IO ()
 imprimeTabuleiro tab = do
     putStrLn "--- JOGO DA VELHA ---\n"
@@ -93,9 +71,86 @@ imprimeTabuleiro tab = do
            ++ "\n2   " ++ tab ! (2,1) ++ "   " ++ tab ! (2,2) ++ "   " ++ tab ! (2,3)
            ++ "\n3   " ++ tab ! (3,1) ++ "   " ++ tab ! (3,2) ++ "   " ++ tab ! (3,3))
 
+jogadorDaVez :: String -> String
+jogadorDaVez jogador 
+    | "X" = "O"
+    | otherwise "X"
+
+menu1  :: IO ()
+menu1 = do print "Em breve"
+menu2  :: IO ()
+menu2 = do print "Em breve"
+menu3  :: IO ()
+menu4 = do print "Em breve"
+menu41 :: IO ()
+menu41 = do print "Em breve"
+menu42 :: IO ()
+menu42 = do print "Em breve"
+menu5  :: IO ()
+menu5 = do print "Em breve"
+
+ehPosicaoValida :: String -> Bool
+ehPosicaoValida entrada = do
+    -- pesquisar como acessar o elemento de uma string 
+    {-
+      if ((entrada[0] == '1' || entrada[0] == '2' || entrada[0] == '3') &&
+        (entrada[2] == '1' || entrada[2] == '2' || entrada[2] == '3') &&
+        (entrada[1] == ' '))
+     -}
+
+recuperaPosicaoValida :: String -> (Int, Int)
+recuperaPosicaoValida entrada = do
+    {-
+      if (entrada[0] == '1') posicao.linha = 0;
+		else if (entrada[0] == '2') posicao.linha = 1;
+		else if (entrada[0] == '3') posicao.linha = 2;
+		if (entrada[2] == '1') posicao.coluna = 0;
+		else if (entrada[2] == '2') posicao.coluna = 1;
+		else if (entrada[2] == '3') posicao.coluna = 2;
+     -}
+
+processaEntrada :: String -> (Int, Int)
+processaEntrada jogador = do
+    putStr "Joga " ++ jogador ++ "[lin col] ou [menu X]: "
+    let entrada <- getLine
+    case () of
+    _   | entrada == "menu 1"      ->  menu1
+        | entrada == "menu 2"      ->  menu2
+        | entrada == "menu 3"      ->  menu3
+        | entrada == "menu 41"     ->  menu41
+        | entrada == "menu 42"     ->  menu42
+        | entrada == "menu 5"      ->  menu5
+        | ehPosicaoValida entrada  ->  recuperaPosicaoValida entrada
+        | otherwise  -> do
+            putStr "   Padrao: [lin col] ou [menu X]"
+            putStr "      1 1\n      2 3\n      menu 5"
+            processaEntrada jogador
+
+jogadorJoga :: Array (Int, Int) String -> String -> Array (Int, Int) String
+jogadorJoga tab jogador = do
+    menu
+    let posicao = processaEntrada jogador
+    atualizaTabuleiro tab posicao jogador
+
+turnoJogador :: Array (Int, Int) String -> String -> String
+turnoJogador tab jogador = do
+    imprimeTabuleiro tab
+    let tabAtualizado = jogadorJoga tab jogador
+    let vencedor = verificaVitoria tabAtualizado jogador
+    if vencedor then 
+        "Parabens, jogador " ++ jogador ++ "! Voce venceu!"
+    else do
+        if deuVelha tabAtualizado then
+            "Deu velha!"
+        else
+            turnoJogador (tabAtualizado (jogadorDaVez jogador))
+
+
 main = do
     instrucoes
     -- tabuleiro, índices iniciam em [1 1] tamanho 3x3
     let tabuleiro = array ((1,1),(3,3)) [((x,y), vazio) | x <- [1,2,3], y <- [1,2,3]]
     -- imprimeTabuleiro (elems tabuleiro)
-    imprimeTabuleiro tabuleiro
+    print (turnoJogador (tabuleiro (jogadorDaVez "X")))
+    -- imprimeTabuleiro tabuleiro
+    
