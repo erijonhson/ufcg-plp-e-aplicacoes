@@ -40,16 +40,16 @@ import System.Process
 import Data.Array
 
 -- sinônimos
-type Tabuleiro = Array Posicao String      -- Sinônimo para Tabuleiro
 type Marcacao = String                        -- Sinônimo para marcação no tabuleiro
 type Posicao = (Int, Int)                     -- Sinônimo para uma posição escolhida
+type Tabuleiro = Array Posicao Marcacao       -- Sinônimo para Tabuleiro
 
 -- constantes 
-vazio :: String
+vazio :: Marcacao
 vazio = "-"
-primeiroJogador :: String
+primeiroJogador :: Marcacao
 primeiroJogador = "X"
-segundoJogador :: String
+segundoJogador :: Marcacao
 segundoJogador = "O"
 
 instrucoes = do
