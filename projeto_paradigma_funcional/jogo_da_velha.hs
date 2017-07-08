@@ -33,6 +33,7 @@
 -- Possível ajuda: https://gist.github.com/marcoscastro/d6b0be7f6cf600fdb53b
 -- Problemas com print fora do main: https://wiki.haskell.org/Introduction_to_Haskell_IO/Actions
 -- See Plataform: http://haskell.tailorfontela.com.br/introduction
+-- Sobre arrays: https://www.haskell.org/tutorial/arrays.html
 
 import System.IO
 import System.IO.Error
@@ -99,27 +100,19 @@ menu42 = return ((-1, -1))
 menu5  :: IO Posicao
 menu5 = return ((-1, -1))
 
-ehPosicaoValida :: String -> Bool
-ehPosicaoValida [] = False
-ehPosicaoValida entrada = do
-    if (entrada !! 0 == '1' || entrada !! 0 == '2' || entrada !! 0 == '3') &&
-       (entrada !! 2 == '1' || entrada !! 2 == '2' || entrada !! 2 == '3') &&
-       (entrada !! 1 == ' ') then True else False
-
-recuperaPosicaoValida :: String -> IO Posicao
-recuperaPosicaoValida entrada = do
-    let linha = if entrada !! 0 == '1' then 1 else if entrada !! 0 == '2' then 2 else 3
-    let coluna = if entrada !! 2 == '1' then 1 else if entrada !! 2 == '2' then 2 else 3 
-    return ((linha, coluna))
-
-processaEntrada :: Marcacao -> IO Posicao
-processaEntrada jogador = do
+processaEntrada :: Marcacao -> Tabuleiro -> IO Posicao
+processaEntrada jogador tab = do
     
     putStrLn ("Joga " ++ jogador ++ " [lin col] ou [menu X]: ")
-    
     entrada <- getLine
     
-    if ehPosicaoValida entrada then recuperaPosicaoValida entrada
+    if ehPosicaoValida entrada then do 
+        let posicao = recuperaPosicaoValida entrada
+        if ehPosicaoVazia posicao tab then
+            return (posicao)
+        else do
+            putStrLn "   Invalido: Espaco ocupado!"
+            processaEntrada jogador tab
     else do 
         case entrada of
             "menu 1"      ->  menu1
@@ -131,20 +124,20 @@ processaEntrada jogador = do
             otherwise     -> do
                 putStrLn "   INVÁLIDO! Padrao: [lin col] ou [menu X]"
                 putStrLn "      1 1\n      2 3\n      menu 5"
-                processaEntrada jogador
+                processaEntrada jogador tab
 
 jogadorJoga :: Tabuleiro -> Marcacao -> IO Tabuleiro
 jogadorJoga tab jogador = do
     menu
-    posicao <- processaEntrada jogador
-    print posicao -- teste
-    -- atualizaTabuleiro tab posicao jogador
-    return (tab)
+    posicao <- processaEntrada jogador tab
+    let tabAtualizado = tab // [(posicao,vazio), (posicao,jogador)] 
+    return (tabAtualizado)
 
 turnoJogador :: Tabuleiro -> Marcacao -> IO String 
 turnoJogador tab jogador = do
     imprimeTabuleiro tab
     tabAtualizado <- jogadorJoga tab jogador
+    imprimeTabuleiro tabAtualizado -- teste
     return ("Teste OK?") -- teste
     {- let vencedor = verificaVitoria tabAtualizado jogador
     if vencedor then do
@@ -163,3 +156,21 @@ main = do
     let tabuleiro = array ((1,1),(3,3)) [((x,y), vazio) | x <- [1,2,3], y <- [1,2,3]]
     resultado <- turnoJogador tabuleiro primeiroJogador
     putStrLn resultado
+
+-- refatoramentos
+
+ehPosicaoValida :: String -> Bool
+ehPosicaoValida [] = False
+ehPosicaoValida entrada = do
+    if (entrada !! 0 == '1' || entrada !! 0 == '2' || entrada !! 0 == '3') &&
+       (entrada !! 2 == '1' || entrada !! 2 == '2' || entrada !! 2 == '3') &&
+       (entrada !! 1 == ' ') then True else False
+
+recuperaPosicaoValida :: String -> Posicao
+recuperaPosicaoValida entrada = do
+    let linha = if entrada !! 0 == '1' then 1 else if entrada !! 0 == '2' then 2 else 3
+    let coluna = if entrada !! 2 == '1' then 1 else if entrada !! 2 == '2' then 2 else 3 
+    (linha, coluna)
+
+ehPosicaoVazia :: Posicao -> Tabuleiro -> Bool
+ehPosicaoVazia pos tab = if tab ! pos == vazio then True else False
