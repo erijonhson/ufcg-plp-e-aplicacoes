@@ -34,6 +34,8 @@
 -- Problemas com print fora do main: https://wiki.haskell.org/Introduction_to_Haskell_IO/Actions
 -- See Plataform: http://haskell.tailorfontela.com.br/introduction
 -- Sobre arrays: https://www.haskell.org/tutorial/arrays.html
+-- reference: http://zvon.org/other/haskell/Outputglobal/index.html
+-- exercícios sobre matrizes: http://www.glc.us.es/~jalonso/vestigium/i1m2012-ejercicios-sobre-matrices-en-haskell-2/
 
 import System.IO
 import System.IO.Error
@@ -53,6 +55,16 @@ primeiroJogador = "X"
 segundoJogador :: Marcacao
 segundoJogador = "O"
 
+-- função principal
+main = do
+    instrucoes
+    -- tabuleiro, índices iniciam em (1,1) e terminam em (3,3)
+    let tabuleiro = array ((1,1),(3,3)) [((x,y), vazio) | x <- [1,2,3], y <- [1,2,3]]
+    resultado <- turnoJogador tabuleiro primeiroJogador
+    putStrLn resultado
+
+-- auxiliares de main
+
 instrucoes = do
     system "cls" -- limpa a tela (windows somente) 
     putStrLn "Bem-vindos ao Jogo da Velha!\n"
@@ -65,14 +77,24 @@ instrucoes = do
     putStrLn "Quando isto acontece, o jogador que colocou o simbolo ganha o jogo (e o outro perde)"
     putStrLn "O jogo tambem pode terminar quando alguem preenche o ultimo espaco disponível (neste caso quem ganha e a 'velha').\n\n"
 
-menu :: IO ()
-menu = do
-    putStrLn "\nmenu 1. Ganhar: se voce tem duas pecas numa linha, ponha a terceira."
-    putStrLn "menu 2. Bloquear: se o oponente tiver duas pecas em linha."
-    putStrLn "menu 3. Triangulo: crie uma oportunidade para ganhar de duas maneiras."
-    putStrLn "menu 41. Bloquear o Triangulo do oponente colocando 2 pecas em linha."
-    putStrLn "menu 42. bloquear formacao de Triangulo do oponente."
-    putStrLn "menu 5. Jogue no centro.\n"
+turnoJogador :: Tabuleiro -> Marcacao -> IO String 
+turnoJogador tab jogador = do
+    imprimeTabuleiro tab
+    tabAtualizado <- jogadorJoga tab jogador
+    let vencedor = verificaVitoria tabAtualizado jogador
+    if vencedor then do
+        imprimeTabuleiro tabAtualizado
+        return("Parabens, jogador " ++ jogador ++ "! Voce venceu!")
+    else do
+        if deuVelha tabAtualizado then do
+            imprimeTabuleiro tabAtualizado
+            return ("Deu velha!")
+        else
+            turnoJogador tabAtualizado (oponente jogador)
+
+-- fim auxiliares de main
+
+-- auxiliares de turnoJogador
 
 imprimeTabuleiro :: Tabuleiro -> IO ()
 imprimeTabuleiro tab = do
@@ -82,23 +104,61 @@ imprimeTabuleiro tab = do
            ++ "\n2   " ++ tab ! (2,1) ++ "   " ++ tab ! (2,2) ++ "   " ++ tab ! (2,3)
            ++ "\n3   " ++ tab ! (3,1) ++ "   " ++ tab ! (3,2) ++ "   " ++ tab ! (3,3))
 
-jogadorDaVez :: String -> String
-jogadorDaVez jogador 
-    | jogador == primeiroJogador  = segundoJogador
-    | otherwise        = primeiroJogador
+jogadorJoga :: Tabuleiro -> Marcacao -> IO Tabuleiro
+jogadorJoga tab jogador = do
+    menu
+    posicao <- processaEntrada jogador tab
+    let tabAtualizado = tab // [(posicao,vazio), (posicao,jogador)] 
+    return (tabAtualizado)
 
-menu1  :: IO Posicao
-menu1 = return ((-1, -1))
-menu2  :: IO Posicao
-menu2 = return ((-1, -1))
-menu3  :: IO Posicao
-menu3 = return ((-1, -1))
-menu41  :: IO Posicao
-menu41 = return ((-1, -1))
-menu42  :: IO Posicao
-menu42 = return ((-1, -1))
-menu5  :: IO Posicao
-menu5 = return ((-1, -1))
+verificaVitoria :: Tabuleiro -> Marcacao -> Bool
+verificaVitoria tab jog = do
+    -- linhas
+    let l1 = [tab ! (1,i) | i <- [1..3]]
+    let l2 = [tab ! (2,i) | i <- [1..3]]
+    let l3 = [tab ! (3,i) | i <- [1..3]]
+    -- colunas
+    let c1 = [tab ! (i,1) | i <- [1..3]]
+    let c2 = [tab ! (i,2) | i <- [1..3]]
+    let c3 = [tab ! (i,3) | i <- [1..3]]
+    -- diagonal principal
+    let dp = [tab ! (i,i) | i <- [1..3]]
+    -- diagonal secundária
+    let ds = [tab ! (i,3+1-i) | i <- [1..3]]
+    
+    -- linhas
+    if verificaDirecao l1 jog || verificaDirecao l2 jog || verificaDirecao l3 jog then True 
+    -- colunas
+    else if verificaDirecao c1 jog || verificaDirecao c2 jog || verificaDirecao c3 jog then True
+    -- diagonal principal
+    else if verificaDirecao dp jog then True
+    -- diagonal secundária
+    else if verificaDirecao ds jog then True 
+    -- não houve vitória
+    else False
+
+deuVelha :: Tabuleiro -> Bool
+deuVelha tab = do
+    let vetor = elems tab
+    not (elem vazio vetor)
+
+oponente :: Marcacao -> Marcacao
+oponente jogador 
+    | jogador == primeiroJogador  = segundoJogador
+    | otherwise                   = primeiroJogador
+
+-- fim de auxiliares turnoJogador
+
+-- auxiliares de jogadorJoga
+
+menu :: IO ()
+menu = do
+    putStrLn "\nmenu 1. Ganhar: se voce tem duas pecas numa linha, ponha a terceira."
+    putStrLn "menu 2. Bloquear: se o oponente tiver duas pecas em linha."
+    putStrLn "menu 3. Triangulo: crie uma oportunidade para ganhar de duas maneiras."
+    putStrLn "menu 41. Bloquear o Triangulo do oponente colocando 2 pecas em linha."
+    putStrLn "menu 42. bloquear formacao de Triangulo do oponente."
+    putStrLn "menu 5. Jogue no centro.\n"
 
 processaEntrada :: Marcacao -> Tabuleiro -> IO Posicao
 processaEntrada jogador tab = do
@@ -111,53 +171,24 @@ processaEntrada jogador tab = do
         if ehPosicaoVazia posicao tab then
             return (posicao)
         else do
-            putStrLn "   Invalido: Espaco ocupado!"
+            putStrLn "   Inválido: Espaço ocupado!"
             processaEntrada jogador tab
     else do 
         case entrada of
-            "menu 1"      ->  menu1
-            "menu 2"      ->  menu2
-            "menu 3"      ->  menu3
-            "menu 41"     ->  menu41
-            "menu 42"     ->  menu42
-            "menu 5"      ->  menu5
+            "menu 1"      ->  return (menu1)
+            "menu 2"      ->  return (menu2)
+            "menu 3"      ->  return (menu3)
+            "menu 41"     ->  return (menu41)
+            "menu 42"     ->  return (menu42)
+            "menu 5"      ->  return (menu5)
             otherwise     -> do
-                putStrLn "   INVÁLIDO! Padrao: [lin col] ou [menu X]"
+                putStrLn "   INVÁLIDO! Padrão: [lin col] ou [menu X]"
                 putStrLn "      1 1\n      2 3\n      menu 5"
                 processaEntrada jogador tab
 
-jogadorJoga :: Tabuleiro -> Marcacao -> IO Tabuleiro
-jogadorJoga tab jogador = do
-    menu
-    posicao <- processaEntrada jogador tab
-    let tabAtualizado = tab // [(posicao,vazio), (posicao,jogador)] 
-    return (tabAtualizado)
+-- fim auxiliares de jogadorJoga
 
-turnoJogador :: Tabuleiro -> Marcacao -> IO String 
-turnoJogador tab jogador = do
-    imprimeTabuleiro tab
-    tabAtualizado <- jogadorJoga tab jogador
-    imprimeTabuleiro tabAtualizado -- teste
-    return ("Teste OK?") -- teste
-    {- let vencedor = verificaVitoria tabAtualizado jogador
-    if vencedor then do
-        return("Parabens, jogador " ++ jogador ++ "! Voce venceu!")
-    else do
-        if deuVelha tabAtualizado then do
-            return ("Deu velha!")
-        else
-            turnoJogador (tabAtualizado (jogadorDaVez jogador))
-    -}
-
-
-main = do
-    instrucoes
-    -- tabuleiro, índices iniciam em (1,1) e terminam em (3,3)
-    let tabuleiro = array ((1,1),(3,3)) [((x,y), vazio) | x <- [1,2,3], y <- [1,2,3]]
-    resultado <- turnoJogador tabuleiro primeiroJogador
-    putStrLn resultado
-
--- refatoramentos
+-- auxiliares de processaEntrada
 
 ehPosicaoValida :: String -> Bool
 ehPosicaoValida [] = False
@@ -174,3 +205,28 @@ recuperaPosicaoValida entrada = do
 
 ehPosicaoVazia :: Posicao -> Tabuleiro -> Bool
 ehPosicaoVazia pos tab = if tab ! pos == vazio then True else False
+
+-- fim auxiliares de processaEntrada
+
+-- auxiliares de verificaVitoria
+
+verificaDirecao :: [Marcacao] -> Marcacao -> Bool
+verificaDirecao lista jog = 
+    if elem vazio lista || elem (oponente jog) lista then False else True
+
+-- fim auxiliares de verificaVitoria
+
+-- menus
+
+menu1  :: Posicao
+menu1 = (2, 2)
+menu2  :: Posicao
+menu2 = (2, 2)
+menu3  :: Posicao
+menu3 = (2, 2)
+menu41  :: Posicao
+menu41 = (2, 2)
+menu42  :: Posicao
+menu42 = (2, 2)
+menu5  :: Posicao
+menu5 = (2, 2)
