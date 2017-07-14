@@ -183,7 +183,9 @@ processaEntrada jogador tab = do
             "menu 2"      ->  do
                 let pos = menu2 tab jogador
                 verificaMenu jogador tab pos
-            "menu 3"      ->  return (menu3)
+            "menu 3"      ->  do
+                let pos = menu3 tab jogador
+                verificaMenu jogador tab pos
             "menu 41"     ->  return (menu41)
             "menu 42"     ->  return (menu42)
             "menu 5"      ->  return (menu5)
@@ -245,16 +247,16 @@ posicoesParaVitoriaProximaJogada tab jogador = do
     -- diagonal secundária
     let ds = [((i,3+1-i), tab ! (i,3+1-i)) | i <- [1..3]]
     
-    let marcacao1 = posicaoParaVitoria l1 jogador
-    let marcacao2 = posicaoParaVitoria l2 jogador
-    let marcacao3 = posicaoParaVitoria l3 jogador
-    let marcacao4 = posicaoParaVitoria c1 jogador
-    let marcacao5 = posicaoParaVitoria c2 jogador
-    let marcacao6 = posicaoParaVitoria c3 jogador
-    let marcacao7 = posicaoParaVitoria dp jogador
-    let marcacao8 = posicaoParaVitoria ds jogador
+    let posicao1 = posicaoParaVitoria l1 jogador
+    let posicao2 = posicaoParaVitoria l2 jogador
+    let posicao3 = posicaoParaVitoria l3 jogador
+    let posicao4 = posicaoParaVitoria c1 jogador
+    let posicao5 = posicaoParaVitoria c2 jogador
+    let posicao6 = posicaoParaVitoria c3 jogador
+    let posicao7 = posicaoParaVitoria dp jogador
+    let posicao8 = posicaoParaVitoria ds jogador
     
-    let posicoesVitoria = marcacao1 ++ marcacao2 ++ marcacao3 ++ marcacao4 ++ marcacao5 ++ marcacao6 ++ marcacao7 ++ marcacao8
+    let posicoesVitoria = posicao1 ++ posicao2 ++ posicao3 ++ posicao4 ++ posicao5 ++ posicao6 ++ posicao7 ++ posicao8
     
     posicoesVitoria
 
@@ -280,8 +282,37 @@ menu2 tab jogador = do
     let posicoes = posicoesParaVitoriaProximaJogada tab (oponente jogador)
     if posicoes == [] then (-1, -1) else posicoes !! 0
 
-menu3  :: Posicao
-menu3 = (2, 2)
+verificaPossibilidadeDeTriangulo :: Tabuleiro -> Marcacao -> Posicao -> [Posicao]
+verificaPossibilidadeDeTriangulo tab jogador pos = do
+    if tab ! pos == vazio then
+        -- geral
+        {-
+           if (tabuleiro[i][j] == VAZIO) {
+				tabuleiro[i][j] = jogador; // marca para testes
+				int possibilidades = verifica_possibilidades(tabuleiro, jogador);
+				tabuleiro[i][j] = VAZIO; // reseta jogada
+				if (possibilidades >= 2) { // condição de triângulo
+					posicao.linha = i;
+					posicao.coluna = j;
+					return posicao;
+           -}
+    else 
+        []
+
+menu3 :: Tabuleiro -> Marcacao -> [Posicao]
+menu3 tab jogador = do
+    let p1 = verificaPossibilidadeDeTriangulo tab jogador (1, 1)
+    let p2 = verificaPossibilidadeDeTriangulo tab jogador (1, 2)
+    let p3 = verificaPossibilidadeDeTriangulo tab jogador (1, 3)
+    let p4 = verificaPossibilidadeDeTriangulo tab jogador (2, 1)
+    let p5 = verificaPossibilidadeDeTriangulo tab jogador (2, 2)
+    let p6 = verificaPossibilidadeDeTriangulo tab jogador (2, 3)
+    let p7 = verificaPossibilidadeDeTriangulo tab jogador (3, 1)
+    let p8 = verificaPossibilidadeDeTriangulo tab jogador (3, 2)
+    let p9 = verificaPossibilidadeDeTriangulo tab jogador (3, 3)
+    
+	let posicoes = p1 ++ p2 ++ p3 ++ p4 ++ p5 ++ p6 ++ p7 ++ p8 ++ p9
+	if posicoes == [] then (-1, -1) else posicoes !! 0
 
 menu41  :: Posicao
 menu41 = (2, 2)
