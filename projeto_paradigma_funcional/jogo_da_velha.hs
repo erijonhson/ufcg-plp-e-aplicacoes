@@ -46,6 +46,7 @@ import Data.Array
 type Marcacao = String                        -- Sinônimo para marcação no tabuleiro
 type Posicao = (Int, Int)                     -- Sinônimo para uma posição escolhida
 type Tabuleiro = Array Posicao Marcacao       -- Sinônimo para Tabuleiro
+type Direcao = (Posicao, Marcacao)            -- Sinônimo para Direção
 
 -- constantes 
 vazio :: Marcacao
@@ -113,6 +114,7 @@ jogadorJoga tab jogador = do
 
 verificaVitoria :: Tabuleiro -> Marcacao -> Bool
 verificaVitoria tab jog = do
+
     -- linhas
     let l1 = [tab ! (1,i) | i <- [1..3]]
     let l2 = [tab ! (2,i) | i <- [1..3]]
@@ -175,8 +177,12 @@ processaEntrada jogador tab = do
             processaEntrada jogador tab
     else do 
         case entrada of
-            "menu 1"      ->  return (menu1)
-            "menu 2"      ->  return (menu2)
+            "menu 1"      ->  do
+                let pos = menu1 tab jogador
+                verificaMenu jogador tab pos
+            "menu 2"      ->  do
+                let pos = menu2 tab jogador
+                verificaMenu jogador tab pos
             "menu 3"      ->  return (menu3)
             "menu 41"     ->  return (menu41)
             "menu 42"     ->  return (menu42)
@@ -206,6 +212,14 @@ recuperaPosicaoValida entrada = do
 ehPosicaoVazia :: Posicao -> Tabuleiro -> Bool
 ehPosicaoVazia pos tab = if tab ! pos == vazio then True else False
 
+verificaMenu :: Marcacao -> Tabuleiro -> Posicao -> IO Posicao
+verificaMenu jogador tab posicao = do
+    if posicao == (-1, -1) then do
+        putStrLn "   Menu momentaneamente inválido."
+        processaEntrada jogador tab
+    else
+        return (posicao)
+
 -- fim auxiliares de processaEntrada
 
 -- auxiliares de verificaVitoria
@@ -216,17 +230,64 @@ verificaDirecao lista jog =
 
 -- fim auxiliares de verificaVitoria
 
+posicoesParaVitoriaProximaJogada :: Tabuleiro -> Marcacao -> [Posicao]
+posicoesParaVitoriaProximaJogada tab jogador = do
+    -- linhas
+    let l1 = [((1,i), tab ! (1,i)) | i <- [1..3]]
+    let l2 = [((2,i), tab ! (2,i)) | i <- [1..3]]
+    let l3 = [((3,i), tab ! (3,i)) | i <- [1..3]]
+    -- colunas
+    let c1 = [((i,1), tab ! (i,1)) | i <- [1..3]]
+    let c2 = [((i,2), tab ! (i,2)) | i <- [1..3]]
+    let c3 = [((i,3), tab ! (i,3)) | i <- [1..3]]
+    -- diagonal principal
+    let dp = [((i,i), tab ! (i,i)) | i <- [1..3]]
+    -- diagonal secundária
+    let ds = [((i,3+1-i), tab ! (i,3+1-i)) | i <- [1..3]]
+    
+    let marcacao1 = posicaoParaVitoria l1 jogador
+    let marcacao2 = posicaoParaVitoria l2 jogador
+    let marcacao3 = posicaoParaVitoria l3 jogador
+    let marcacao4 = posicaoParaVitoria c1 jogador
+    let marcacao5 = posicaoParaVitoria c2 jogador
+    let marcacao6 = posicaoParaVitoria c3 jogador
+    let marcacao7 = posicaoParaVitoria dp jogador
+    let marcacao8 = posicaoParaVitoria ds jogador
+    
+    let posicoesVitoria = marcacao1 ++ marcacao2 ++ marcacao3 ++ marcacao4 ++ marcacao5 ++ marcacao6 ++ marcacao7 ++ marcacao8
+    
+    posicoesVitoria
+
+posicaoParaVitoria :: [Direcao] -> Marcacao -> [Posicao] 
+posicaoParaVitoria lista jogador = do
+    let posicao1 = lista !! 0
+    let posicao2 = lista !! 1
+    let posicao3 = lista !! 2
+    if (snd posicao1 == jogador) && (snd posicao2 == jogador) && (snd posicao3 == vazio) then [fst posicao3]
+    else if (snd posicao1 == jogador) && (snd posicao3 == jogador) && (snd posicao2 == vazio) then [fst posicao2]
+    else if (snd posicao2 == jogador) && (snd posicao3 == jogador) && (snd posicao1 == vazio) then [fst posicao1]
+    else []
+
 -- menus
 
-menu1  :: Posicao
-menu1 = (2, 2)
-menu2  :: Posicao
-menu2 = (2, 2)
+menu1 :: Tabuleiro -> Marcacao -> Posicao
+menu1 tab jogador = do
+    let posicoes = posicoesParaVitoriaProximaJogada tab jogador
+    if posicoes == [] then (-1, -1) else posicoes !! 0
+
+menu2 :: Tabuleiro -> Marcacao -> Posicao
+menu2 tab jogador = do
+    let posicoes = posicoesParaVitoriaProximaJogada tab (oponente jogador)
+    if posicoes == [] then (-1, -1) else posicoes !! 0
+
 menu3  :: Posicao
 menu3 = (2, 2)
+
 menu41  :: Posicao
 menu41 = (2, 2)
+
 menu42  :: Posicao
 menu42 = (2, 2)
+
 menu5  :: Posicao
 menu5 = (2, 2)
