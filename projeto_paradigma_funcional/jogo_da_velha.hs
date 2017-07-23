@@ -281,6 +281,10 @@ menu2 :: Tabuleiro -> Marcacao -> Posicao
 menu2 tab jogador = do
     let posicoes = posicoesParaVitoriaProximaJogada tab (oponente jogador)
     if posicoes == [] then (-1, -1) else posicoes !! 0
+    
+recuperaOpononte :: Marcacao -> Marcacao
+recuperaOponente m | m == "O" = "X"
+				   | m == "X" = "O"
 
 verificaPossibilidadeDeTriangulo :: Tabuleiro -> Marcacao -> Posicao -> [Posicao]
 verificaPossibilidadeDeTriangulo tab jogador pos = do
@@ -321,4 +325,7 @@ menu42  :: Posicao
 menu42 = (2, 2)
 
 menu5  :: Posicao
-menu5 = (2, 2)
+menu5 = jogarNoCentro 0
+
+jogarNoCentro :: Int -> Posicao
+jogarNoCentro n = (2,2)

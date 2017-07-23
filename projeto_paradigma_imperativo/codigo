@@ -1,0 +1,7 @@
+posicoesParaVitoriaNaProximaJogada :: Tabuleiro -> Marcacao -> [Posicao]
+posicoesParaVitoriaNaProximaJogada t m = verificaLinhas t m
+
+--verificaLinhas :: Tabuleiro -> Marcacao -> [Posicao]
+--verificaLinhas (head:tail) m | head == m = a:verificaColunas 
+--							 | head == vazio = 
+--							 | 
