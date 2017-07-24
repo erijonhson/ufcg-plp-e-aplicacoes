@@ -282,37 +282,48 @@ menu2 tab jogador = do
     let posicoes = posicoesParaVitoriaProximaJogada tab (oponente jogador)
     if posicoes == [] then (-1, -1) else posicoes !! 0
     
-recuperaOpononte :: Marcacao -> Marcacao
+recuperaOponente :: Marcacao -> Marcacao
 recuperaOponente m | m == "O" = "X"
 				   | m == "X" = "O"
 
 verificaPossibilidadeDeTriangulo :: Tabuleiro -> Marcacao -> Posicao -> [Posicao]
-verificaPossibilidadeDeTriangulo tab jogador pos = do
-    if tab ! pos == vazio then
-		--let tabAtualizado = tab // [(pos, vazio), (pos, jogador)]
-		--let posicoes = posicaoParaVitoria tabAtualizado jogador
-		--if length posicoes >= 2 then
-		--[pos]
-		--else 
-		--[]
-	--else
-	[]
+verificaPossibilidadeDeTriangulo tab jogador pos =
+    if tab ! pos == vazio then do
+		let tabAtualizado = tab // [(pos, vazio), (pos, jogador)]
+		let posicoes = posicoesParaVitoriaProximaJogada tabAtualizado jogador
+		if length posicoes >= 2 then [pos] else []
+	else []
+
+triangulo :: Tabuleiro -> Marcacao -> [Posicao]
+triangulo tab jogador = do
+
+	--antes verificar se eh necessario se defender
+	
+	let bloqueios = posicoesParaVitoriaProximaJogada tab (oponente jogador)
+	
+	if bloqueios == [] then do
+
+        let p1 = verificaPossibilidadeDeTriangulo tab jogador (1, 1)
+        let p2 = verificaPossibilidadeDeTriangulo tab jogador (1, 2)
+        let p3 = verificaPossibilidadeDeTriangulo tab jogador (1, 3)
+        let p4 = verificaPossibilidadeDeTriangulo tab jogador (2, 1)
+        let p5 = verificaPossibilidadeDeTriangulo tab jogador (2, 2)
+        let p6 = verificaPossibilidadeDeTriangulo tab jogador (2, 3)
+        let p7 = verificaPossibilidadeDeTriangulo tab jogador (3, 1)
+        let p8 = verificaPossibilidadeDeTriangulo tab jogador (3, 2)
+        let p9 = verificaPossibilidadeDeTriangulo tab jogador (3, 3)
+     
+        let posicoesTriangulo = p1 ++ p2 ++ p3 ++ p4 ++ p5 ++ p6 ++ p7 ++ p8 ++ p9
+	
+        posicoesTriangulo
+   
+        else [bloqueios !! 0]
 
 
-menu3 :: Tabuleiro -> Marcacao -> [Posicao]
+menu3 :: Tabuleiro -> Marcacao -> Posicao
 menu3 tab jogador = do
-    let p1 = verificaPossibilidadeDeTriangulo tab jogador (1, 1)
-    let p2 = verificaPossibilidadeDeTriangulo tab jogador (1, 2)
-    let p3 = verificaPossibilidadeDeTriangulo tab jogador (1, 3)
-    let p4 = verificaPossibilidadeDeTriangulo tab jogador (2, 1)
-    let p5 = verificaPossibilidadeDeTriangulo tab jogador (2, 2)
-    let p6 = verificaPossibilidadeDeTriangulo tab jogador (2, 3)
-    let p7 = verificaPossibilidadeDeTriangulo tab jogador (3, 1)
-    let p8 = verificaPossibilidadeDeTriangulo tab jogador (3, 2)
-    let p9 = verificaPossibilidadeDeTriangulo tab jogador (3, 3)
-    
-	let posicoes = p1 ++ p2 ++ p3 ++ p4 ++ p5 ++ p6 ++ p7 ++ p8 ++ p9
-	if posicoes == [] then (-1, -1) else posicoes !! 0
+    let posicoes = triangulo tab jogador
+    if posicoes == [] then (-1, -1) else posicoes !! 0
 
 menu41  :: Posicao
 menu41 = (2, 2)
