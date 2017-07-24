@@ -289,19 +289,15 @@ recuperaOponente m | m == "O" = "X"
 verificaPossibilidadeDeTriangulo :: Tabuleiro -> Marcacao -> Posicao -> [Posicao]
 verificaPossibilidadeDeTriangulo tab jogador pos = do
     if tab ! pos == vazio then
-        -- geral
-        {-
-           if (tabuleiro[i][j] == VAZIO) {
-				tabuleiro[i][j] = jogador; // marca para testes
-				int possibilidades = verifica_possibilidades(tabuleiro, jogador);
-				tabuleiro[i][j] = VAZIO; // reseta jogada
-				if (possibilidades >= 2) { // condição de triângulo
-					posicao.linha = i;
-					posicao.coluna = j;
-					return posicao;
-           -}
-    else 
-        []
+		--let tabAtualizado = tab // [(pos, vazio), (pos, jogador)]
+		--let posicoes = posicaoParaVitoria tabAtualizado jogador
+		--if length posicoes >= 2 then
+		--[pos]
+		--else 
+		--[]
+	--else
+	[]
+
 
 menu3 :: Tabuleiro -> Marcacao -> [Posicao]
 menu3 tab jogador = do
