@@ -186,9 +186,15 @@ processaEntrada jogador tab = do
             "menu 3"      ->  do
                 let pos = menu3 tab jogador
                 verificaMenu jogador tab pos
-            "menu 41"     ->  return (menu41)
-            "menu 42"     ->  return (menu42)
-            "menu 5"      ->  return (menu5)
+            "menu 41"       ->  do
+                let pos = menu41 tab jogador
+                verificaMenu jogador tab pos
+            "menu 42"     ->  do
+                let pos = menu42 tab jogador
+                verificaMenu jogador tab pos
+            "menu 5"      ->  do
+                let pos = menu5 tab jogador
+                verificaMenu jogador tab pos
             otherwise     -> do
                 putStrLn "   INVÁLIDO! Padrão: [lin col] ou [menu X]"
                 putStrLn "      1 1\n      2 3\n      menu 5"
@@ -311,6 +317,10 @@ oponenteConsegueTriangulo tab jogador = do
     else do
         let tabAtualizado = tab // [(bloqueios !! 0, vazio), (bloqueios !! 0, (oponente jogador))]
         if verificaPossibilidades tabAtualizado (oponente jogador) >= 2 then True else False
+        
+recuperaOponente :: Marcacao -> Marcacao
+recuperaOponente m | m == "O" = "X"
+                   | m == "X" = "O"
     
 -- menus
 
@@ -323,10 +333,6 @@ menu2 :: Tabuleiro -> Marcacao -> Posicao
 menu2 tab jogador = do
     let posicoes = posicoesParaVitoriaProximaJogada tab (oponente jogador)
     if posicoes == [] then (-1, -1) else posicoes !! 0
-    
-recuperaOponente :: Marcacao -> Marcacao
-recuperaOponente m | m == "O" = "X"
-                   | m == "X" = "O"
 
 verificaPossibilidadeDeTriangulo :: Tabuleiro -> Marcacao -> Posicao -> [Posicao]
 verificaPossibilidadeDeTriangulo tab jogador pos =
@@ -366,14 +372,38 @@ menu3 tab jogador = do
     let posicoes = triangulo tab jogador
     if posicoes == [] then (-1, -1) else posicoes !! 0
 
-menu41  :: Posicao
-menu41 = (2, 2)
+menu41  :: Tabuleiro -> Marcacao -> Posicao
+menu41 tab jogador 
+			|op /= [] = bloquearTrianguloComOfensiva tab jogador
+			|otherwise = menu2 tab jogador
+			where op = posicoesParaVitoriaProximaJogada tab (oponente jogador)
 
-menu42  :: Posicao
-menu42 = (2, 2)
+bloquearTrianguloComOfensiva :: Tabuleiro -> Marcacao -> Posicao
+bloquearTrianguloComOfensiva tab jog 
+	| umaJogadaNoCanto tab (oponente jog) /= -1 = jogarNoCentro 0
+	| otherwise = evitaTrianguloComOfensiva tab jog
 
-menu5  :: Posicao
-menu5 = jogarNoCentro 0
+evitaTrianguloComOfensiva :: Tabuleiro -> Marcacao -> Posicao
+evitaTrianguloComOfensiva tab jog = (2,2)
+-- precisa fazer aquela verificacao do for menor de C
 
-jogarNoCentro :: Int -> Posicao
-jogarNoCentro n = (2,2)
+menu42  :: Tabuleiro -> Marcacao -> Posicao
+menu42 tab jogador 
+			|op /= [] = bloquearTriangulo tab jogador
+			|otherwise = menu2 tab jogador
+			where op = posicoesParaVitoriaProximaJogada tab (oponente jogador)
+
+bloquearTriangulo :: Tabuleiro -> Marcacao -> Posicao
+bloquearTriangulo tab jog 
+	| umaJogadaNoCanto tab (oponente jog) /= -1 = jogarNoCentro 0
+	| otherwise = evitaTriangulo tab jog
+
+evitaTriangulo :: Tabuleiro -> Marcacao -> Posicao
+evitaTriangulo tab jog = (2,2)
+-- precisa fazer aquela verificacao do for menor de C
+
+menu5  :: Tabuleiro -> Marcacao -> Posicao
+menu5 tab jogador = jogarNoCentro jogador 
+
+jogarNoCentro :: Marcacao -> Posicao
+jogarNoCentro jogador = (2,2)
