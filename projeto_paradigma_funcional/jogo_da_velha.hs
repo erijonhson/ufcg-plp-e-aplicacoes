@@ -222,15 +222,11 @@ ehPosicaoVazia pos tab = if tab ! pos == vazio then True else False
 
 verificaMenu :: Marcacao -> Tabuleiro -> Posicao -> IO Posicao
 verificaMenu jogador tab posicao = do
-    if posicao == (-1, -1) then do
+    if posicao == (-1, -1) || not (ehPosicaoVazia posicao tab) then do
         putStrLn "   Menu momentaneamente inválido."
         processaEntrada jogador tab
     else
-        if ehPosicaoVazia posicao tab then
-            return (posicao)
-        else do
-            putStrLn "   Inválido: Espaço ocupado!"
-            processaEntrada jogador tab
+        return (posicao)
 
 -- fim auxiliares de processaEntrada
 
@@ -331,14 +327,26 @@ posicaoEhJogador pos jogador tab = do
 umaJogadaNoCanto :: Tabuleiro -> Marcacao -> Bool
 umaJogadaNoCanto tab jogador = do
 
-    let canto1 = posicaoEhJogador (1,1) jogador tab
-    let canto2 = posicaoEhJogador (1,3) jogador tab
-    let canto3 = posicaoEhJogador (3,1) jogador tab
-    let canto4 = posicaoEhJogador (3,3) jogador tab
+    let p1 = if tab ! (1, 1) /= vazio then 1 else 0
+    let p2 = p1 + if tab ! (1, 2) /= vazio then 1 else 0
+    let p3 = p2 + if tab ! (1, 3) /= vazio then 1 else 0
+    let p4 = p3 + if tab ! (2, 1) /= vazio then 1 else 0
+    let p5 = p4 + if tab ! (2, 2) /= vazio then 1 else 0
+    let p6 = p5 + if tab ! (2, 3) /= vazio then 1 else 0
+    let p7 = p6 + if tab ! (3, 1) /= vazio then 1 else 0
+    let p8 = p7 + if tab ! (3, 2) /= vazio then 1 else 0
+    let p9 = p8 + if tab ! (3, 3) /= vazio then 1 else 0
     
-    let jogadas = canto1 ++ canto2 ++ canto3 ++ canto4
+    if p9 > 1 then False
+    else do
+        let canto1 = posicaoEhJogador (1,1) jogador tab
+        let canto2 = posicaoEhJogador (1,3) jogador tab
+        let canto3 = posicaoEhJogador (3,1) jogador tab
+        let canto4 = posicaoEhJogador (3,3) jogador tab
     
-    if length jogadas == 1 then True else False
+        let jogadas = canto1 ++ canto2 ++ canto3 ++ canto4
+    
+        if length jogadas == 1 then True else False
     
 verificaPossibilidades :: Tabuleiro -> Marcacao -> Int
 verificaPossibilidades tab jogador = do
@@ -394,6 +402,41 @@ bloquearTrianguloComOfensiva tab jogador = do
     else [bloqueios !! 0]
 
 
+verificaBloquearTriangulo :: Tabuleiro -> Marcacao -> Posicao -> [Posicao]
+verificaBloquearTriangulo tab jogador pos = do
+    if tab ! pos == vazio then do
+        let tabAtualizado = tab // [(pos, vazio), (pos, jogador)]
+        let consegue = oponenteConsegueTriangulo tabAtualizado (oponente jogador)
+        if consegue then [] else [pos]
+    else []
+
+bloquearTriangulo :: Tabuleiro -> Marcacao -> [Posicao]
+bloquearTriangulo tab jogador = do
+    
+    let bloqueios = posicoesParaVitoriaProximaJogada tab (oponente jogador)
+    
+    if bloqueios == [] then do
+        
+        if umaJogadaNoCanto tab (oponente jogador) then [jogarNoCentro jogador]
+        else do
+    
+            let o1 = verificaBloquearTriangulo tab jogador (1, 1)
+            let o2 = verificaBloquearTriangulo tab jogador (1, 2)
+            let o3 = verificaBloquearTriangulo tab jogador (1, 3)
+            let o4 = verificaBloquearTriangulo tab jogador (2, 1)
+            let o5 = verificaBloquearTriangulo tab jogador (2, 2)
+            let o6 = verificaBloquearTriangulo tab jogador (2, 3)
+            let o7 = verificaBloquearTriangulo tab jogador (3, 1)
+            let o8 = verificaBloquearTriangulo tab jogador (3, 2)
+            let o9 = verificaBloquearTriangulo tab jogador (3, 3)
+        
+            let ofensivas = o1 ++ o2 ++ o3 ++ o4 ++ o5 ++ o6 ++ o7 ++ o8 ++ o9
+        
+            ofensivas
+        
+    else [bloqueios !! 0]
+
+
 menu3 :: Tabuleiro -> Marcacao -> Posicao
 menu3 tab jogador = do
     let posicoes = triangulo tab jogador
@@ -405,7 +448,9 @@ menu41 tab jogador = do
     if posicoes == [] then (-1, -1) else posicoes !! 0
 
 menu42  :: Tabuleiro -> Marcacao -> Posicao
-menu42 tab jogador = (2, 2)
+menu42 tab jogador = do
+    let posicoes = bloquearTriangulo tab jogador
+    if posicoes == [] then (-1, -1) else posicoes !! 0
 
 menu5  :: Tabuleiro -> Marcacao -> Posicao
 menu5 tab jogador = jogarNoCentro jogador 
