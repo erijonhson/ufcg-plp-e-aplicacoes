@@ -355,16 +355,16 @@ oponenteConsegueTriangulo tab oponente = do
     else do
         let tabAtualizado = tab // [(bloqueios !! 0, vazio), (bloqueios !! 0, oponente)]
         if verificaPossibilidades tabAtualizado oponente >= 2 then True else False
- 
+
 
 verificaOfensivaOponente :: Tabuleiro -> Marcacao -> Posicao -> [Posicao]
 verificaOfensivaOponente tab jogador pos = do
     if tab ! pos == vazio then do
         let tabAtualizado = tab // [(pos, vazio), (pos, jogador)]
-        if verificaPossibilidades tab jogador == 0 then [] 
+        if verificaPossibilidades tabAtualizado jogador == 0 then [] 
         else do
-        let consegue = oponenteConsegueTriangulo tabAtualizado (oponente jogador)
-        if consegue then [pos] else []
+            let consegue = oponenteConsegueTriangulo tabAtualizado (oponente jogador)
+            if consegue then [pos] else []
     else []
 
 
@@ -373,23 +373,23 @@ bloquearTrianguloComOfensiva tab jogador = do
     let bloqueios = posicoesParaVitoriaProximaJogada tab (oponente jogador)
     
     if bloqueios == [] then do
-		 --falta resolver o metodo umaJogadaNoCanto
+        
         if umaJogadaNoCanto tab (oponente jogador) then [jogarNoCentro jogador]
         else do
     
-        let o1 = verificaOfensivaOponente tab jogador (1, 1)
-        let o2 = verificaOfensivaOponente tab jogador (1, 2)
-        let o3 = verificaOfensivaOponente tab jogador (1, 3)
-        let o4 = verificaOfensivaOponente tab jogador (2, 1)
-        let o5 = verificaOfensivaOponente tab jogador (2, 2)
-        let o6 = verificaOfensivaOponente tab jogador (2, 3)
-        let o7 = verificaOfensivaOponente tab jogador (3, 1)
-        let o8 = verificaOfensivaOponente tab jogador (3, 2)
-        let o9 = verificaOfensivaOponente tab jogador (3, 3)
-     
-        let ofensivas = o1 ++ o2 ++ o3 ++ o4 ++ o5 ++ o6 ++ o7 ++ o8 ++ o9
-    
-        ofensivas
+            let o1 = verificaOfensivaOponente tab jogador (1, 1)
+            let o2 = verificaOfensivaOponente tab jogador (1, 2)
+            let o3 = verificaOfensivaOponente tab jogador (1, 3)
+            let o4 = verificaOfensivaOponente tab jogador (2, 1)
+            let o5 = verificaOfensivaOponente tab jogador (2, 2)
+            let o6 = verificaOfensivaOponente tab jogador (2, 3)
+            let o7 = verificaOfensivaOponente tab jogador (3, 1)
+            let o8 = verificaOfensivaOponente tab jogador (3, 2)
+            let o9 = verificaOfensivaOponente tab jogador (3, 3)
+        
+            let ofensivas = o1 ++ o2 ++ o3 ++ o4 ++ o5 ++ o6 ++ o7 ++ o8 ++ o9
+        
+            ofensivas
         
     else [bloqueios !! 0]
 
