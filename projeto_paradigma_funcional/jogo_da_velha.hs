@@ -226,7 +226,11 @@ verificaMenu jogador tab posicao = do
         putStrLn "   Menu momentaneamente inválido."
         processaEntrada jogador tab
     else
-        return (posicao)
+        if ehPosicaoVazia posicao tab then
+            return (posicao)
+        else do
+            putStrLn "   Inválido: Espaço ocupado!"
+            processaEntrada jogador tab
 
 -- fim auxiliares de processaEntrada
 
