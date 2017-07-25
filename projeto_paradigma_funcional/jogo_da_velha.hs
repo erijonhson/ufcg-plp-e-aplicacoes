@@ -275,53 +275,7 @@ posicaoParaVitoria lista jogador = do
     else if (snd posicao1 == jogador) && (snd posicao3 == jogador) && (snd posicao2 == vazio) then [fst posicao2]
     else if (snd posicao2 == jogador) && (snd posicao3 == jogador) && (snd posicao1 == vazio) then [fst posicao1]
     else []
-    
-posicaoEhCanto :: [Direcao] -> Marcacao -> [Posicao]
-posicaoEhCanto lista jogador = do
-    let posicao1 = lista !! 0
-    let posicao2 = lista !! 1
-    let posicao3 = lista !! 2
-    
-    if (snd posicao1 == jogador) && (snd posicao2 == vazio) && (snd posicao3 == vazio) then [fst posicao1]
-    else if (snd posicao1 == vazio) && (snd posicao2 == vazio) && (snd posicao3 == jogador) then [fst posicao3]
-    else []
-
-
-umaJogadaNoCanto :: Tabuleiro -> Marcacao -> Bool
-umaJogadaNoCanto tab jogador = do
-    -- linhas
-    let l1 = [((1,i), tab ! (1,i)) | i <- [1..3]]
-    let l3 = [((3,i), tab ! (3,i)) | i <- [1..3]]
-    
-    let cantosL1 = posicaoEhCanto l1 jogador
-    let cantosL2 = posicaoEhCanto l3 jogador
-    
-    let jogadas = cantosL1 ++ cantosL2
-    
-    if length jogadas == 1 then True else False
-    
-    
-verificaPossibilidades :: Tabuleiro -> Marcacao -> Int
-verificaPossibilidades tab jogador = do
-    let possibilidades = posicoesParaVitoriaProximaJogada tab jogador
-    length possibilidades
-    
-oponenteConsegueTriangulo :: Tabuleiro -> Marcacao -> Bool
-oponenteConsegueTriangulo tab jogador = do
-    let bloqueios = posicoesParaVitoriaProximaJogada tab (oponente jogador)
-    
-    if bloqueios == [] then do
-        let posicao = triangulo tab (oponente jogador)
-        if posicao == [] then False else True
-        
-    else do
-        let tabAtualizado = tab // [(bloqueios !! 0, vazio), (bloqueios !! 0, (oponente jogador))]
-        if verificaPossibilidades tabAtualizado (oponente jogador) >= 2 then True else False
-        
-recuperaOponente :: Marcacao -> Marcacao
-recuperaOponente m | m == "O" = "X"
-                   | m == "X" = "O"
-    
+               
 -- menus
 
 menu1 :: Tabuleiro -> Marcacao -> Posicao
@@ -366,6 +320,75 @@ triangulo tab jogador = do
    
         else [bloqueios !! 0]
 
+posicaoEhJogador :: Posicao -> Marcacao -> Tabuleiro -> [Posicao]
+posicaoEhJogador pos jogador tab = do
+    if tab ! pos == jogador then [pos] else []
+
+umaJogadaNoCanto :: Tabuleiro -> Marcacao -> Bool
+umaJogadaNoCanto tab jogador = do
+
+    let canto1 = posicaoEhJogador (1,1) jogador tab
+    let canto2 = posicaoEhJogador (1,3) jogador tab
+    let canto3 = posicaoEhJogador (3,1) jogador tab
+    let canto4 = posicaoEhJogador (3,3) jogador tab
+    
+    let jogadas = canto1 ++ canto2 ++ canto3 ++ canto4
+    
+    if length jogadas == 1 then True else False
+    
+verificaPossibilidades :: Tabuleiro -> Marcacao -> Int
+verificaPossibilidades tab jogador = do
+    let possibilidades = posicoesParaVitoriaProximaJogada tab jogador
+    length possibilidades
+    
+oponenteConsegueTriangulo :: Tabuleiro -> Marcacao -> Bool
+oponenteConsegueTriangulo tab oponente = do
+    let bloqueios = posicoesParaVitoriaProximaJogada tab oponente
+    
+    if bloqueios == [] then do
+        let posicao = triangulo tab oponente
+        if posicao == [] then False else True 
+    else do
+        let tabAtualizado = tab // [(bloqueios !! 0, vazio), (bloqueios !! 0, oponente)]
+        if verificaPossibilidades tabAtualizado oponente >= 2 then True else False
+ 
+
+verificaOfensivaOponente :: Tabuleiro -> Marcacao -> Posicao -> [Posicao]
+verificaOfensivaOponente tab jogador pos = do
+    if tab ! pos == vazio then do
+        let tabAtualizado = tab // [(pos, vazio), (pos, jogador)]
+        if verificaPossibilidades tab jogador == 0 then [] 
+        else do
+        let consegue = oponenteConsegueTriangulo tabAtualizado (oponente jogador)
+        if consegue then [pos] else []
+    else []
+
+
+bloquearTrianguloComOfensiva :: Tabuleiro -> Marcacao -> [Posicao]
+bloquearTrianguloComOfensiva tab jogador = do
+    let bloqueios = posicoesParaVitoriaProximaJogada tab (oponente jogador)
+    
+    if bloqueios == [] then do
+		 --falta resolver o metodo umaJogadaNoCanto
+        if umaJogadaNoCanto tab (oponente jogador) then [jogarNoCentro jogador]
+        else do
+    
+        let o1 = verificaOfensivaOponente tab jogador (1, 1)
+        let o2 = verificaOfensivaOponente tab jogador (1, 2)
+        let o3 = verificaOfensivaOponente tab jogador (1, 3)
+        let o4 = verificaOfensivaOponente tab jogador (2, 1)
+        let o5 = verificaOfensivaOponente tab jogador (2, 2)
+        let o6 = verificaOfensivaOponente tab jogador (2, 3)
+        let o7 = verificaOfensivaOponente tab jogador (3, 1)
+        let o8 = verificaOfensivaOponente tab jogador (3, 2)
+        let o9 = verificaOfensivaOponente tab jogador (3, 3)
+     
+        let ofensivas = o1 ++ o2 ++ o3 ++ o4 ++ o5 ++ o6 ++ o7 ++ o8 ++ o9
+    
+        ofensivas
+        
+    else [bloqueios !! 0]
+
 
 menu3 :: Tabuleiro -> Marcacao -> Posicao
 menu3 tab jogador = do
@@ -373,34 +396,12 @@ menu3 tab jogador = do
     if posicoes == [] then (-1, -1) else posicoes !! 0
 
 menu41  :: Tabuleiro -> Marcacao -> Posicao
-menu41 tab jogador 
-			|op /= [] = bloquearTrianguloComOfensiva tab jogador
-			|otherwise = menu2 tab jogador
-			where op = posicoesParaVitoriaProximaJogada tab (oponente jogador)
-
-bloquearTrianguloComOfensiva :: Tabuleiro -> Marcacao -> Posicao
-bloquearTrianguloComOfensiva tab jog 
-	| umaJogadaNoCanto tab (oponente jog) /= -1 = jogarNoCentro 0
-	| otherwise = evitaTrianguloComOfensiva tab jog
-
-evitaTrianguloComOfensiva :: Tabuleiro -> Marcacao -> Posicao
-evitaTrianguloComOfensiva tab jog = (2,2)
--- precisa fazer aquela verificacao do for menor de C
+menu41 tab jogador = do
+    let posicoes = bloquearTrianguloComOfensiva tab jogador
+    if posicoes == [] then (-1, -1) else posicoes !! 0
 
 menu42  :: Tabuleiro -> Marcacao -> Posicao
-menu42 tab jogador 
-			|op /= [] = bloquearTriangulo tab jogador
-			|otherwise = menu2 tab jogador
-			where op = posicoesParaVitoriaProximaJogada tab (oponente jogador)
-
-bloquearTriangulo :: Tabuleiro -> Marcacao -> Posicao
-bloquearTriangulo tab jog 
-	| umaJogadaNoCanto tab (oponente jog) /= -1 = jogarNoCentro 0
-	| otherwise = evitaTriangulo tab jog
-
-evitaTriangulo :: Tabuleiro -> Marcacao -> Posicao
-evitaTriangulo tab jog = (2,2)
--- precisa fazer aquela verificacao do for menor de C
+menu42 tab jogador = (2, 2)
 
 menu5  :: Tabuleiro -> Marcacao -> Posicao
 menu5 tab jogador = jogarNoCentro jogador 
