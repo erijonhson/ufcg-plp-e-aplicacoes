@@ -30,9 +30,15 @@
  * 5. Centro: jogue no centro. 
 */
 
-tabuleiroVazio([['-', '-', '-'], 
-				['-', '-', '-'], 
-				['-', '-', '-']]).
+tabuleiroVazio([['1', '2', '3'], 
+				['4', '5', '6'], 
+				['7', '8', '9']]).
+
+/* --------------------------------------- list --------------------------------------- */
+replace(L, P, E, R) :- 
+    P1 is (P - 1), 
+    findall(X, (nth0(I,L,Y), (I == P1 -> X = E ; X = Y)), R).
+/* --------------------------------------- list --------------------------------------- */
 
 /* --------------------------------------- mostrar tabuleiro e menu --------------------------------------- */
 
@@ -57,15 +63,74 @@ imprimeMenu :-
 imprimeJogoDaVelha(T) :- 
 	writeln('--- JOGO DA VELHA ---\n'),
 	writeln('    1   2   3'),
-	imprimeTabuleiro(1, T),
-	imprimeMenu.
+	imprimeTabuleiro(1, T).
 
 /* --------------------------------------- mostrar tabuleiro e menu --------------------------------------- */
+
+/* --------------------------------------- jogador --------------------------------------- */
+oponente(Jogador, Oponente) :- Jogador = 'X', Oponente = 'O'.
+oponente(Jogador, Oponente) :- Jogador = 'O', Oponente = 'X'.
+
+processaEntrada("menu 1", Jogador, Tabuleiro, TabAtualizado) :- 
+	writeln("Menu 1"),
+	TabAtualizado = Tabuleiro.
+
+processaEntrada("menu 2", Jogador, Tabuleiro, TabAtualizado) :- 
+	writeln("Menu 2"),
+	TabAtualizado = Tabuleiro.
+
+processaEntrada("menu 3", Jogador, Tabuleiro, TabAtualizado) :- 
+	writeln("Menu 3"),
+	TabAtualizado = Tabuleiro.
+
+processaEntrada("menu 4", Jogador, Tabuleiro, TabAtualizado) :- 
+	writeln("Menu 4"),
+	TabAtualizado = Tabuleiro.
+
+processaEntrada("menu 5", Jogador, Tabuleiro, TabAtualizado) :- 
+	writeln("Menu 5"),
+	TabAtualizado = Tabuleiro.
+
+processaEntrada([Linha,Coluna|[]], Jogador, Tabuleiro, TabAtualizado) :- 
+	TabAtualizado = Tabuleiro.
+
+processaEntrada(_, Jogador, Tabuleiro, TabAtualizado) :- 
+	writeln("   INVÁLIDO! Padrão: [lin,col]. ou [menu X]."),
+	writeln("      [1,1].\n      [2,3].\n      \"menu 5\"."),
+	processaEntrada(Jogador, Tabuleiro, TabAtualizado).
+
+processaEntrada(Jogador, Tabuleiro, TabAtualizado) :- 
+	write("Joga "), write(Jogador), write(" [lin col] ou [menu X]: "),
+	read(Entrada),
+	processaEntrada(Entrada, Jogador, Tabuleiro, TabAtualizado).
+
+jogadorJoga(Tabuleiro, Jogador, TabAtualizado) :- 
+	imprimeMenu,
+	processaEntrada(Jogador, Tabuleiro, TabAtualizado).
+
+turnoJogador(Tabuleiro, Jogador, Resultado) :- 
+	imprimeJogoDaVelha(Tabuleiro),
+	jogadorJoga(Tabuleiro, Jogador, TabAtualizado),
+% teste abaixo
+	string_concat("Teste com ", Jogador, Resultado),
+	imprimeJogoDaVelha(TabAtualizado).
+%	let vencedor = verificaVitoria tabAtualizado jogador
+%	if vencedor then do
+%		imprimeTabuleiro tabAtualizado
+%		return("Parabens, jogador " ++ jogador ++ "! Voce venceu!")
+%	else do
+%		if deuVelha tabAtualizado then do
+%			imprimeTabuleiro tabAtualizado
+%			return ("Deu velha!")
+%		else
+%			turnoJogador tabAtualizado (oponente jogador)
+%	string_concat("Teste com ", Jogador, Resultado).
+/* --------------------------------------- jogador --------------------------------------- */
 
 :- initialization(main).
 
 main :-
-  repeat,
   tabuleiroVazio(T),
-  imprimeJogoDaVelha(T),
+  turnoJogador(T, 'X', R),
+  writeln(R),
   halt(0).
