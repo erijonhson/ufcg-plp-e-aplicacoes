@@ -30,14 +30,16 @@
  * 5. Centro: jogue no centro. 
 */
 
-tabuleiroVazio([['1', '2', '3'], 
-				['4', '5', '6'], 
-				['7', '8', '9']]).
+tabuleiroVazio([['-', '-', '-'], 
+				['-', '-', '-'], 
+				['-', '-', '-']]).
 
 /* --------------------------------------- list --------------------------------------- */
+
 replace(L, P, E, R) :- 
-    P1 is (P - 1), 
-    findall(X, (nth0(I,L,Y), (I == P1 -> X = E ; X = Y)), R).
+	P1 is (P - 1), 
+	findall(X, (nth0(I,L,Y), (I == P1 -> X = E ; X = Y)), R).
+
 /* --------------------------------------- list --------------------------------------- */
 
 /* --------------------------------------- mostrar tabuleiro e menu --------------------------------------- */
@@ -68,8 +70,13 @@ imprimeJogoDaVelha(T) :-
 /* --------------------------------------- mostrar tabuleiro e menu --------------------------------------- */
 
 /* --------------------------------------- jogador --------------------------------------- */
+
 oponente(Jogador, Oponente) :- Jogador = 'X', Oponente = 'O'.
 oponente(Jogador, Oponente) :- Jogador = 'O', Oponente = 'X'.
+
+situacao('X', '1').
+situacao('O', '2').
+situacao('V', 'V').
 
 processaEntrada("menu 1", Jogador, Tabuleiro, TabAtualizado) :- 
 	writeln("Menu 1"),
@@ -92,11 +99,13 @@ processaEntrada("menu 5", Jogador, Tabuleiro, TabAtualizado) :-
 	TabAtualizado = Tabuleiro.
 
 processaEntrada([Linha,Coluna|[]], Jogador, Tabuleiro, TabAtualizado) :- 
-	TabAtualizado = Tabuleiro.
+	nth1(Linha, Tabuleiro, Lista),
+	replace(Lista, Coluna, Jogador, NovaLinha),
+	replace(Tabuleiro, Linha, NovaLinha, TabAtualizado).
 
 processaEntrada(_, Jogador, Tabuleiro, TabAtualizado) :- 
 	writeln("   INVÁLIDO! Padrão: [lin,col]. ou [menu X]."),
-	writeln("      [1,1].\n      [2,3].\n      \"menu 5\"."),
+	writeln("      [1, 1].\n      [2, 3].\n      \"menu 5\"."),
 	processaEntrada(Jogador, Tabuleiro, TabAtualizado).
 
 processaEntrada(Jogador, Tabuleiro, TabAtualizado) :- 
@@ -108,29 +117,32 @@ jogadorJoga(Tabuleiro, Jogador, TabAtualizado) :-
 	imprimeMenu,
 	processaEntrada(Jogador, Tabuleiro, TabAtualizado).
 
-turnoJogador(Tabuleiro, Jogador, Resultado) :- 
+% TODO: Como fazer para VERIFICAR a vitória???
+verificaVitoria(Tabuleiro, Jogador, Resultado) :-
+%	string_concat("Parabens, jogador", Jogador, Parcial), string_concat(Parcial, "! Voce venceu!", Resultado),
+%	verificaLinhas(Tabuleiro, Jogador, ResultLinhas),
+%	verificaColunas(Tabuleiro, Jogador, ResultColunas),
+	Resultado = 'X',
+	writeln(Resultado).
+
+turnoJogador(_, _, '1', "Parabens, jogador X! Voce venceu!").
+turnoJogador(_, _, '2', "Parabens, jogador O! Voce venceu!").
+turnoJogador(_, _, 'V', "Deu velha!").
+
+turnoJogador(Tabuleiro, Jogador, _, Resultado) :- 
 	imprimeJogoDaVelha(Tabuleiro),
 	jogadorJoga(Tabuleiro, Jogador, TabAtualizado),
-% teste abaixo
-	string_concat("Teste com ", Jogador, Resultado),
-	imprimeJogoDaVelha(TabAtualizado).
-%	let vencedor = verificaVitoria tabAtualizado jogador
-%	if vencedor then do
-%		imprimeTabuleiro tabAtualizado
-%		return("Parabens, jogador " ++ jogador ++ "! Voce venceu!")
-%	else do
-%		if deuVelha tabAtualizado then do
-%			imprimeTabuleiro tabAtualizado
-%			return ("Deu velha!")
-%		else
-%			turnoJogador tabAtualizado (oponente jogador)
-%	string_concat("Teste com ", Jogador, Resultado).
+	verificaVitoria(TabAtualizado, Jogador, Temp),
+	situacao(Temp, Situacao),
+	oponente(Jogador, Oponente),
+	turnoJogador(TabAtualizado, Oponente, Situacao, Resultado).
+
 /* --------------------------------------- jogador --------------------------------------- */
 
 :- initialization(main).
 
 main :-
   tabuleiroVazio(T),
-  turnoJogador(T, 'X', R),
+  turnoJogador(T, 'X', "RunBarry", R),
   writeln(R),
   halt(0).
