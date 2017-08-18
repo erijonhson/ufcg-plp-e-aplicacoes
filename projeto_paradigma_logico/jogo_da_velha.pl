@@ -42,7 +42,7 @@ replace(List, Position, Element, Result) :-
 
 columnN([],_,[]).
 columnN([H|T], I, [R|X]) :- 
-	nth1(I, H, R), 
+	nth1(I, H, R),
 	columnN(T,I,X).
 
 colunas(4, _, _).
@@ -143,10 +143,11 @@ espacoOcupado(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado) :-
 	writeln("    Espaco Ocupado!"),
 	processaEntrada(Jogador, Tabuleiro, TabAtualizado).
 
+%Aqui será caso a jogada for valida
 processaEntrada([Linha, Coluna|[]], Jogador, Tabuleiro, TabAtualizado) :- 
 	espacoOcupado(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado);
 	nth1(Linha, Tabuleiro, Lista),
-	replace(Lista, Coluna, Jogador, NovaLinha),
+	replace(Lista, Coluna, Jogador, NovaLinha), 
 	replace(Tabuleiro, Linha, NovaLinha, TabAtualizado).
 
 processaEntrada(_, Jogador, Tabuleiro, TabAtualizado) :- 
@@ -197,11 +198,17 @@ turnoJogador(Tabuleiro, _, 'V', "Deu velha!") :-
 turnoJogador(Tabuleiro, Jogador, _, Resultado) :- 
 	imprimeJogoDaVelha(Tabuleiro),
 	jogadorJoga(Tabuleiro, Jogador, TabAtualizado),
-	direcoes(TabAtualizado, Direcoes),
+	direcoes(TabAtualizado, Direcoes),''
 	verificaVitoria(Direcoes, Jogador, Temp),
 	situacao(Temp, Situacao),
 	oponente(Jogador, Oponente),
 	turnoJogador(TabAtualizado, Oponente, Situacao, Resultado).
+
+posicoesVitoriaProximaJogada(Jogador, Tabuleiro, TabAtualizado) :-
+	direcoes(Tabuleiro, Direcoes),
+	verificaVitoria(Direcoes, Jogador, Temp),
+
+
 
 /* --------------------------------------- jogador --------------------------------------- */
 
