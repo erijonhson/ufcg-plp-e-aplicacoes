@@ -36,6 +36,8 @@ tabuleiroVazio([['-', '-', '-'],
 
 /* --------------------------------------- list --------------------------------------- */
 % http://www.swi-prolog.org/pldoc/doc_for?object=append/3
+%	Insert Element in Position of List:
+%	nth1(Pos, Result, Element, List).
 
 replace(List, Position, Element, Result) :- 
 	findall(X, (nth1(I,List,Y), (I == Position -> X = Element ; X = Y)), Result).
@@ -86,7 +88,8 @@ secundaria([], _, _, []).
 secundaria([H|T], C, L, [E|X]) :- 
 	nth1(C, H, R),
 	constroiElementoDeDirecao(L, C, R, E),
-	C1 is C - 1, L1 is L + 1,
+	C1 is C - 1, 
+	L1 is L + 1, 
 	secundaria(T, C1, L1, X).
 
 diagonais(Tabuleiro, Result) :- 
@@ -95,8 +98,10 @@ diagonais(Tabuleiro, Result) :-
 	nth1(1, Temp, Prin, []),
 	nth1(2, Result, Sec, Temp).
 
-%	Insert Element in Position of List:
-%	nth1(Pos, Result, Element, List).
+insereNoTabuleiro(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado) :- 
+	nth1(Linha, Tabuleiro, Lista),
+	replace(Lista, Coluna, Jogador, NovaLinha),
+	replace(Tabuleiro, Linha, NovaLinha, TabAtualizado).
 
 /* --------------------------------------- list --------------------------------------- */
 
@@ -136,6 +141,22 @@ direcoesComPosicoes(Tabuleiro, Direcoes) :-
 	diagonais(Tabuleiro, Diagonais),
 	append(Temp, Diagonais, Direcoes).
 
+% TODO: Como fazer a recursão parar?
+% abaixo temos os casos de vitória, mas aqui temos que fazer P = [-1, -1].
+% posicaoParaVitoria([_,_,A],   [_,_,B],   [_,_,C], _, P) :- 
+%	P = [-1, -1], A \= B, A \= C, A \= '-'; 
+%	P = [-1, -1], A \= C; 
+%	P = [-1, -1], B \= C.
+
+posicaoParaVitoria([_,_,Z],   [_,_,Z],   [L,C,'-'], J, P) :- Z = J, P = [L,C].
+posicaoParaVitoria([_,_,Z],   [L,C,'-'], [_,_,Z],   J, P) :- Z = J, P = [L,C].
+posicaoParaVitoria([L,C,'-'], [_,_,Z],   [_,_,Z],   J, P) :- Z = J, P = [L,C].
+
+posicaoVencedor([], false).
+posicaoVencedor([[Linha, Coluna]|T], [L, C]) :- 
+	Linha \= -1, Coluna \= -1, L = Linha, C = Coluna; 
+	posicaoVencedor(T, [L, C]).
+
 /* --------------------------------------- menus --------------------------------------- */
 
 /* --------------------------------------- jogador --------------------------------------- */
@@ -149,8 +170,14 @@ situacao('V', 'V').
 situacao(_, "RunBarryRun").
 
 processaEntrada("menu 1", Jogador, Tabuleiro, TabAtualizado) :- 
-	writeln("Menu 1"),
-	TabAtualizado = Tabuleiro.
+	direcoesComPosicoes(Tabuleiro, Direcoes),
+%	findall(X, (nth1(I,List,Y), (I == Position -> X = Element ; X = Y)), Result)
+	findall(X, (nth1(Col,Direcao,[A,B,C]), (posicaoParaVitoria(A, B, C, Jogador, X) ; X = [-1, -1])), PosicoesParaVitoria),
+	writeln(PosicoesParaVitoria).
+%	posicaoVencedor(PosicoesParaVitoria, [Linha, Coluna]),
+%	insereNoTabuleiro(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado);
+%	writeln("    Menu 1 temporariamente indisponível."),
+%	jogadorJoga(Tabuleiro, Jogador, TabAtualizado).
 
 processaEntrada("menu 2", Jogador, Tabuleiro, TabAtualizado) :- 
 	writeln("Menu 2"),
@@ -177,9 +204,7 @@ espacoOcupado(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado) :-
 
 processaEntrada([Linha, Coluna|[]], Jogador, Tabuleiro, TabAtualizado) :- 
 	espacoOcupado(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado);
-	nth1(Linha, Tabuleiro, Lista),
-	replace(Lista, Coluna, Jogador, NovaLinha),
-	replace(Tabuleiro, Linha, NovaLinha, TabAtualizado).
+	insereNoTabuleiro(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado).
 
 processaEntrada(_, Jogador, Tabuleiro, TabAtualizado) :- 
 	writeln("   INVÁLIDO! Padrão: [lin, col]. ou [menu X]."),
@@ -229,7 +254,7 @@ turnoJogador(Tabuleiro, Jogador, _, Resultado) :-
 
 /* --------------------------------------- jogador --------------------------------------- */
 
- :- initialization(main).
+% :- initialization(main).
 
 main :-
   tabuleiroVazio(Tabuleiro),
