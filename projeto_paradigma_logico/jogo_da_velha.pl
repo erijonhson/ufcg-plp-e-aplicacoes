@@ -40,14 +40,33 @@ tabuleiroVazio([['-', '-', '-'],
 replace(List, Position, Element, Result) :- 
 	findall(X, (nth1(I,List,Y), (I == Position -> X = Element ; X = Y)), Result).
 
-columnN([],_,[]).
-columnN([H|T], I, [R|X]) :- 
-	nth1(I, H, R),
-	columnN(T,I,X).
+constroiElementoDeDirecao(A,B,C,R) :- R = [A,B,C].
+
+lineN(Tabuleiro, Lin, Result) :- 
+	nth1(Lin, Tabuleiro, Linha),
+	findall(X, (nth1(Col,Linha,Y), constroiElementoDeDirecao(Lin, Col, Y, X)), Result).
+
+linhas(4, _, _).
+linhas(Index, Tabuleiro, Result) :- 
+	lineN(Tabuleiro, Index, Lin),
+	nth1(Index, Result, Lin, _),
+	Pos is Index + 1,
+	linhas(Pos, Tabuleiro, Result).
+
+linhas(Tabuleiro, Result) :- 
+	linhas(1, Tabuleiro, Temp),
+	append(Temp, [], Result).
+
+columnN([], _, _, []).
+columnN([H|T], C, L, [E|X]) :- 
+	nth1(C, H, R),
+	constroiElementoDeDirecao(L, C, R, E),
+	L1 is L + 1,
+	columnN(T, C, L1, X).
 
 colunas(4, _, _).
 colunas(Index, Tabuleiro, Result) :- 
-	columnN(Tabuleiro, Index, Col),
+	columnN(Tabuleiro, Index, 1, Col),
 	nth1(Index, Result, Col, _),
 	Pos is Index + 1,
 	colunas(Pos, Tabuleiro, Result).
@@ -57,20 +76,22 @@ colunas(Tabuleiro, Result) :-
 	append(Temp, [], Result).
 
 principal([], _,[]).
-principal([H|T], I, [R|X]) :- 
+principal([H|T], I, [E|X]) :- 
 	nth1(I, H, R),
+	constroiElementoDeDirecao(I, I, R, E),
 	P is I + 1, 
 	principal(T, P, X).
 
-secundaria([], _, []).
-secundaria([H|T], I, [R|X]) :- 
-	nth1(I, H, R),
-	P is I - 1, 
-	secundaria(T, P, X).
+secundaria([], _, _, []).
+secundaria([H|T], C, L, [E|X]) :- 
+	nth1(C, H, R),
+	constroiElementoDeDirecao(L, C, R, E),
+	C1 is C - 1, L1 is L + 1,
+	secundaria(T, C1, L1, X).
 
 diagonais(Tabuleiro, Result) :- 
 	principal(Tabuleiro, 1, Prin),
-	secundaria(Tabuleiro, 3, Sec),
+	secundaria(Tabuleiro, 3, 1, Sec),
 	nth1(1, Temp, Prin, []),
 	nth1(2, Result, Sec, Temp).
 
@@ -105,6 +126,17 @@ imprimeJogoDaVelha(T) :-
 	imprimeTabuleiro(1, T).
 
 /* --------------------------------------- mostrar tabuleiro e menu --------------------------------------- */
+
+/* --------------------------------------- menus --------------------------------------- */
+
+direcoesComPosicoes(Tabuleiro, Direcoes) :- 
+	linhas(Tabuleiro, Linhas),
+	colunas(Tabuleiro, Colunas),
+	append(Linhas, Colunas, Temp),
+	diagonais(Tabuleiro, Diagonais),
+	append(Temp, Diagonais, Direcoes).
+
+/* --------------------------------------- menus --------------------------------------- */
 
 /* --------------------------------------- jogador --------------------------------------- */
 
@@ -143,11 +175,10 @@ espacoOcupado(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado) :-
 	writeln("    Espaco Ocupado!"),
 	processaEntrada(Jogador, Tabuleiro, TabAtualizado).
 
-%Aqui será caso a jogada for valida
 processaEntrada([Linha, Coluna|[]], Jogador, Tabuleiro, TabAtualizado) :- 
 	espacoOcupado(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado);
 	nth1(Linha, Tabuleiro, Lista),
-	replace(Lista, Coluna, Jogador, NovaLinha), 
+	replace(Lista, Coluna, Jogador, NovaLinha),
 	replace(Tabuleiro, Linha, NovaLinha, TabAtualizado).
 
 processaEntrada(_, Jogador, Tabuleiro, TabAtualizado) :- 
@@ -164,29 +195,21 @@ jogadorJoga(Tabuleiro, Jogador, TabAtualizado) :-
 	imprimeMenu,
 	processaEntrada(Jogador, Tabuleiro, TabAtualizado).
 
-direcoes(Tabuleiro, Direcoes) :- 
-	colunas(Tabuleiro, Colunas),
-	append(Tabuleiro, Colunas, Temp),
-	diagonais(Tabuleiro, Diagonais),
-	append(Temp, Diagonais, Direcoes).
-
 empate([], 'V').
-empate([[C1,C2,C3]|T], Result) :- 
+empate([[[_,_,C1], [_,_,C2], [_,_,C3]]|T], Result) :- 
 	C1 \= '-', C2 \= '-', C3 \= '-', empate(T, Result).
 
 vitoria(C1, C2, C3, Jogador, Result) :- 
 	C1 == Jogador, C2 == Jogador, C3 == Jogador, Result = Jogador.
 
-verificaVitoria([], _, _, false).
-verificaVitoria(_, _, 'X', 'X').
-verificaVitoria(_, _, 'O', 'O').
-verificaVitoria([[C1,C2,C3]|T], Jogador, Situacao, Result) :- 
+verificaVencedor([], _, false).
+verificaVencedor([[[_,_,C1], [_,_,C2], [_,_,C3]]|T], Jogador, Result) :- 
 	vitoria(C1, C2, C3, Jogador, Temp), Result = Temp;
-	verificaVitoria(T, Jogador, "RunBarryRun", Result).
+	verificaVencedor(T, Jogador, Result).
 
-verificaVitoria(Tabuleiro, Jogador, Result) :- 
-	empate(Tabuleiro, Result);
-	verificaVitoria(Tabuleiro, Jogador, "RunBarryRun", Result).
+verificaVitoria(Direcoes, Jogador, Result) :- 
+	empate(Direcoes, Result);
+	verificaVencedor(Direcoes, Jogador, Result).
 
 turnoJogador(Tabuleiro, _, 'X', "Parabens, jogador X! Voce venceu!") :- 
 	imprimeJogoDaVelha(Tabuleiro).
@@ -198,17 +221,11 @@ turnoJogador(Tabuleiro, _, 'V', "Deu velha!") :-
 turnoJogador(Tabuleiro, Jogador, _, Resultado) :- 
 	imprimeJogoDaVelha(Tabuleiro),
 	jogadorJoga(Tabuleiro, Jogador, TabAtualizado),
-	direcoes(TabAtualizado, Direcoes),''
+	direcoesComPosicoes(TabAtualizado, Direcoes),
 	verificaVitoria(Direcoes, Jogador, Temp),
 	situacao(Temp, Situacao),
 	oponente(Jogador, Oponente),
 	turnoJogador(TabAtualizado, Oponente, Situacao, Resultado).
-
-posicoesVitoriaProximaJogada(Jogador, Tabuleiro, TabAtualizado) :-
-	direcoes(Tabuleiro, Direcoes),
-	verificaVitoria(Direcoes, Jogador, Temp),
-
-
 
 /* --------------------------------------- jogador --------------------------------------- */
 
