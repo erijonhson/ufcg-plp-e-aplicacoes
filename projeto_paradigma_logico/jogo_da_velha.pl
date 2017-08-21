@@ -28,6 +28,11 @@
  *   não pode jogar num canto (jogar no canto nesse cenário criaria um triângulo em que 'X' vence).
  * * Opção 2: se existe uma configuração em que o oponente pode formar um triângulo, bloqueiem-no.
  * 5. Centro: jogue no centro. 
+ * 
+ * Grupo: Eri Jonhson
+		  Gabriel Maracajá
+		  Pedro Henrique
+	      Victor Emanuel Farias
 */
 
 tabuleiroVazio([['-', '-', '-'], 
@@ -143,10 +148,11 @@ direcoesComPosicoes(Tabuleiro, Direcoes) :-
 
 % TODO: Como fazer a recursão parar?
 % abaixo temos os casos de vitória, mas aqui temos que fazer P = [-1, -1].
-% posicaoParaVitoria([_,_,A],   [_,_,B],   [_,_,C], _, P) :- 
-%	P = [-1, -1], A \= B, A \= C, A \= '-'; 
-%	P = [-1, -1], A \= C; 
-%	P = [-1, -1], B \= C.
+posicaoParaVitoria([_,_,A],   [_,_,B],   [_,_,C], _, P) :- 
+	P = [-1, -1], A \= B, A \= C; 
+	P = [-1, -1], A \= C, A \= B; 
+	P = [-1, -1], B \= C, B \= A;
+	P = [-1, -1], A \= B, A \= C, B \= C.
 
 posicaoParaVitoria([_,_,Z],   [_,_,Z],   [L,C,'-'], J, P) :- Z = J, P = [L,C].
 posicaoParaVitoria([_,_,Z],   [L,C,'-'], [_,_,Z],   J, P) :- Z = J, P = [L,C].
