@@ -176,8 +176,13 @@ processaEntrada("menu 1", Jogador, Tabuleiro, TabAtualizado) :-
 	jogadorJoga(Tabuleiro, Jogador, TabAtualizado).
 
 processaEntrada("menu 2", Jogador, Tabuleiro, TabAtualizado) :- 
-	writeln("Menu 2"),
-	TabAtualizado = Tabuleiro.
+	direcoesComPosicoes(Tabuleiro, Direcoes),
+	oponente(Jogador, Oponente),
+	findall(X, (nth1(Col,Direcoes,[A,B,C]), (posicaoParaVitoria(A, B, C, Oponente, R) -> X = R ; X = [-1, -1])), PosicoesParaVitoria),
+	posicaoVencedor(PosicoesParaVitoria, [Linha, Coluna]),
+	insereNoTabuleiro(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado) ;
+	writeln("    Menu 2 temporariamente indisponível."),
+	jogadorJoga(Tabuleiro, Jogador, TabAtualizado).
 
 processaEntrada("menu 3", Jogador, Tabuleiro, TabAtualizado) :- 
 	writeln("Menu 3"),
