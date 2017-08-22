@@ -178,7 +178,7 @@ processaEntrada("menu 1", Jogador, Tabuleiro, TabAtualizado) :-
 	(
 		posicaoVencedor(PosicoesParaVitoria, [Linha, Coluna]) 
 		; 
-		writeln("    Menu 1 temporariamente indisponível."), 
+		writeln("    Menu 1 temporariamente indisponivel."), 
 		TabAtualizado = false
 	),
 	insereNoTabuleiro(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado).
@@ -194,7 +194,7 @@ processaEntrada("menu 2", Jogador, Tabuleiro, TabAtualizado) :-
 	(
 		posicaoVencedor(PosicoesParaVitoria, [Linha, Coluna]) 
 		; 
-		writeln("    Menu 2 temporariamente indisponível."), 
+		writeln("    Menu 2 temporariamente indisponivel."), 
 		TabAtualizado = false
 	),
 	insereNoTabuleiro(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado).
@@ -208,8 +208,8 @@ processaEntrada("menu 4", Jogador, Tabuleiro, TabAtualizado) :-
 	TabAtualizado = Tabuleiro.
 
 processaEntrada("menu 5", Jogador, Tabuleiro, TabAtualizado) :- 
-	writeln("Menu 5"),
-	TabAtualizado = Tabuleiro.
+	espacoOcupado(2, 2, Jogador, Tabuleiro, TabAtualizado);
+	insereNoTabuleiro(2, 2, Jogador, Tabuleiro, TabAtualizado).
 
 espacoOcupado(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado) :- 
 	nth1(Linha, Tabuleiro, Lista),
@@ -219,12 +219,11 @@ espacoOcupado(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado) :-
 	processaEntrada(Jogador, Tabuleiro, TabAtualizado).
 
 processaEntrada([Linha, Coluna|[]], Jogador, Tabuleiro, TabAtualizado) :- 
-	espacoOcupado(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado)
-	;
+	espacoOcupado(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado);
 	insereNoTabuleiro(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado).
 
 processaEntrada(_, Jogador, Tabuleiro, TabAtualizado) :- 
-	writeln("   INVÁLIDO! Padrão: [lin, col]. ou \"menu X\"."),
+	writeln("   INVALIDO! Padrao: [lin, col]. ou \"menu X\"."),
 	writeln("      [1, 1].\n      [2, 3].\n      \"menu 5\"."),
 	processaEntrada(Jogador, Tabuleiro, TabAtualizado).
 
