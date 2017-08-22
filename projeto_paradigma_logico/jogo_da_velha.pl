@@ -117,6 +117,7 @@ imprimeLinha([H|T]) :- write(H), write('   '), imprimeLinha(T).
 
 imprimeTabuleiro(_, []).
 imprimeTabuleiro(N, [H|T]) :- 
+	write(N), write('   '),
 	imprimeLinha(H), writeln(''), 
 	N1 is N + 1, 
 	imprimeTabuleiro(N1, T).
