@@ -233,7 +233,6 @@ processaEntrada(Jogador, Tabuleiro, TabAtualizado) :-
 	read(Entrada),
 	processaEntrada(Entrada, Jogador, Tabuleiro, TabAtualizado) 
 	; 
-	write("Aqui: "), writeln(TabAtualizado),
 	processaEntrada(Jogador, Tabuleiro, TabAtualizado).
 
 jogadorJoga(Tabuleiro, Jogador, TabAtualizado) :- 
