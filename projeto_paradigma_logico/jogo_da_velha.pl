@@ -146,15 +146,69 @@ direcoesComPosicoes(Tabuleiro, Direcoes) :-
 	diagonais(Tabuleiro, Diagonais),
 	append(Temp, Diagonais, Direcoes).
 
-posicaoParaVitoria([_,_,Z],   [_,_,Z],   [L,C,'-'], J, P) :- Z = J, P = [L,C].
-posicaoParaVitoria([_,_,Z],   [L,C,'-'], [_,_,Z],   J, P) :- Z = J, P = [L,C].
-posicaoParaVitoria([L,C,'-'], [_,_,Z],   [_,_,Z],   J, P) :- Z = J, P = [L,C].
+posicaoParaVitoria([_,_,Z],   [_,_,Z],   [L,C,'-'], J, P) :- Z == J, P = [L,C].
+posicaoParaVitoria([_,_,Z],   [L,C,'-'], [_,_,Z],   J, P) :- Z == J, P = [L,C].
+posicaoParaVitoria([L,C,'-'], [_,_,Z],   [_,_,Z],   J, P) :- Z == J, P = [L,C].
 
 posicaoVencedor([], false).
 posicaoVencedor([[Linha, Coluna]|T], [L, C]) :- 
 	Linha \= -1, Coluna \= -1, L = Linha, C = Coluna 
 	; 
 	posicaoVencedor(T, [L, C]).
+
+jogadaDaPartida(Tabuleiro, Jogador, Pos) :-
+	direcoesComPosicoes(Tabuleiro, Direcoes),
+	findall(
+		X, 
+		(nth1(_,Direcoes,[A,B,C]), (posicaoParaVitoria(A, B, C, Jogador, R) -> X = R ; X = [-1, -1])), 
+		PosicoesParaVitoria
+	),
+	!, % corte a busca
+	posicaoVencedor(PosicoesParaVitoria, [Linha, Coluna]), Pos = [Linha, Coluna]
+	;
+	Pos = false.
+
+quantidadeDePosicoesParaVitoria(9, _, Temp, Tam) :- Tam = Temp.
+quantidadeDePosicoesParaVitoria(Index, PosicoesParaVitoria, Len, Tam) :- 
+	nth1(Index, PosicoesParaVitoria,[A,B]),
+	(
+		A \= -1, B \= -1, Temp is Len + 1
+		;
+		Temp is Len
+	),
+	I is Index + 1,
+	quantidadeDePosicoesParaVitoria(I, PosicoesParaVitoria, Temp, Tam).
+
+verificaPossibilidadeDeTriangulo(Linha, Coluna, Jogador, Tabuleiro, Pos) :-
+	nth1(Linha, Tabuleiro, Lista),
+	nth1(Coluna, Lista, Elemento),
+	Elemento == '-',
+	insereNoTabuleiro(Linha, Coluna, Jogador, Tabuleiro, Tab),
+	direcoesComPosicoes(Tab, Direcoes),
+	findall(
+		X, 
+		(nth1(_,Direcoes,[A,B,C]), (posicaoParaVitoria(A, B, C, Jogador, R) -> X = R ; X = [-1, -1])), 
+		PosicoesParaVitoria
+	),
+	!, % corte a busca
+	quantidadeDePosicoesParaVitoria(1, PosicoesParaVitoria, 0, Tam),
+	Tam >= 2,
+	Pos = [Linha, Coluna].
+
+% joga Jogador em Pos
+% 	constrói a PosicoesParaVitoria e verifica se há mais de um elemento != [-1, -1]
+%		caso positivo, retorne Pos
+%		caso negativo, tente jogar no próximo lugar vazio
+triangulo(Jogador, Tabuleiro, Pos) :-
+	verificaPossibilidadeDeTriangulo(1, 1, Jogador, Tabuleiro, Pos) ;
+	verificaPossibilidadeDeTriangulo(1, 2, Jogador, Tabuleiro, Pos) ;
+	verificaPossibilidadeDeTriangulo(1, 3, Jogador, Tabuleiro, Pos) ;
+	verificaPossibilidadeDeTriangulo(2, 1, Jogador, Tabuleiro, Pos) ;
+	verificaPossibilidadeDeTriangulo(2, 2, Jogador, Tabuleiro, Pos) ;
+	verificaPossibilidadeDeTriangulo(2, 3, Jogador, Tabuleiro, Pos) ;
+	verificaPossibilidadeDeTriangulo(3, 1, Jogador, Tabuleiro, Pos) ;
+	verificaPossibilidadeDeTriangulo(3, 2, Jogador, Tabuleiro, Pos) ;
+	verificaPossibilidadeDeTriangulo(3, 3, Jogador, Tabuleiro, Pos).
 
 /* --------------------------------------- menus --------------------------------------- */
 
@@ -169,46 +223,54 @@ situacao('V', 'V').
 situacao(_, "RunBarryRun").
 
 processaEntrada("menu 1", Jogador, Tabuleiro, TabAtualizado) :- 
-	direcoesComPosicoes(Tabuleiro, Direcoes),
-	findall(
-		X, 
-		(nth1(_,Direcoes,[A,B,C]), (posicaoParaVitoria(A, B, C, Jogador, R) -> X = R ; X = [-1, -1])), 
-		PosicoesParaVitoria), 
-		!, % corte a busca
-	(
-		posicaoVencedor(PosicoesParaVitoria, [Linha, Coluna]) 
-		; 
-		writeln("    Menu 1 temporariamente indisponivel."), 
-		TabAtualizado = false
-	),
-	insereNoTabuleiro(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado).
+	jogadaDaPartida(Tabuleiro, Jogador, [Linha, Coluna]),
+	insereNoTabuleiro(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado)
+	;
+	writeln("    Menu 1 temporariamente indisponivel."), 
+	TabAtualizado = false.
 
 processaEntrada("menu 2", Jogador, Tabuleiro, TabAtualizado) :- 
 	oponente(Jogador, Oponente),
-	direcoesComPosicoes(Tabuleiro, Direcoes),
-	findall(
-		X, 
-		(nth1(_,Direcoes,[A,B,C]), (posicaoParaVitoria(A, B, C, Oponente, R) -> X = R ; X = [-1, -1])), 
-		PosicoesParaVitoria), 
-		!, % corte a busca
+	jogadaDaPartida(Tabuleiro, Oponente, [Linha, Coluna]),
+	insereNoTabuleiro(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado)
+	;
+	writeln("    Menu 2 temporariamente indisponivel."), 
+	TabAtualizado = false.
+
+processaEntrada("menu 3", Jogador, Tabuleiro, TabAtualizado) :-
+	oponente(Jogador, Oponente),
+	jogadaDaPartida(Tabuleiro, Oponente, [Lin, Col]),
+	insereNoTabuleiro(Lin, Col, Jogador, Tabuleiro, TabAtualizado)
+	;
 	(
-		posicaoVencedor(PosicoesParaVitoria, [Linha, Coluna]) 
-		; 
-		writeln("    Menu 2 temporariamente indisponivel."), 
+		triangulo(Jogador, Tabuleiro, [Linha, Coluna]),
+		insereNoTabuleiro(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado)
+		;
+		writeln("    Menu 3 temporariamente indisponivel."), 
 		TabAtualizado = false
-	),
-	insereNoTabuleiro(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado).
+	).
 
-processaEntrada("menu 3", Jogador, Tabuleiro, TabAtualizado) :- 
-	writeln("Menu 3"),
-	TabAtualizado = Tabuleiro.
+processaEntrada("menu 41", Jogador, Tabuleiro, TabAtualizado) :- 
+	writeln("    Menu 41 temporariamente indisponivel."), 
+	TabAtualizado = false.
 
-processaEntrada("menu 4", Jogador, Tabuleiro, TabAtualizado) :- 
-	writeln("Menu 4"),
-	TabAtualizado = Tabuleiro.
+processaEntrada("menu 42", Jogador, Tabuleiro, TabAtualizado) :- 
+	oponente(Jogador, Oponente),
+	jogadaDaPartida(Tabuleiro, Oponente, [Lin, Col]),
+	insereNoTabuleiro(Lin, Col, Jogador, Tabuleiro, TabAtualizado)
+	;
+	oponente(Jogador, Oponente),
+	(
+		triangulo(Oponente, Tabuleiro, [Linha, Coluna]),
+		insereNoTabuleiro(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado)
+		;
+		writeln("    Menu 42 temporariamente indisponivel."), 
+		TabAtualizado = false
+	).
 
 processaEntrada("menu 5", Jogador, Tabuleiro, TabAtualizado) :- 
-	espacoOcupado(2, 2, Jogador, Tabuleiro, TabAtualizado);
+	espacoOcupado(2, 2, Jogador, Tabuleiro, TabAtualizado)
+	;
 	insereNoTabuleiro(2, 2, Jogador, Tabuleiro, TabAtualizado).
 
 espacoOcupado(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado) :- 
@@ -219,7 +281,8 @@ espacoOcupado(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado) :-
 	processaEntrada(Jogador, Tabuleiro, TabAtualizado).
 
 processaEntrada([Linha, Coluna|[]], Jogador, Tabuleiro, TabAtualizado) :- 
-	espacoOcupado(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado);
+	espacoOcupado(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado)
+	;
 	insereNoTabuleiro(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado).
 
 processaEntrada(_, Jogador, Tabuleiro, TabAtualizado) :- 
