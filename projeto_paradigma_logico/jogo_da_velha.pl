@@ -146,21 +146,13 @@ direcoesComPosicoes(Tabuleiro, Direcoes) :-
 	diagonais(Tabuleiro, Diagonais),
 	append(Temp, Diagonais, Direcoes).
 
-% TODO: Como fazer a recursão parar?
-% abaixo temos os casos de vitória, mas aqui temos que fazer P = [-1, -1].
-posicaoParaVitoria([_,_,A],   [_,_,B],   [_,_,C], _, P) :- 
-	P = [-1, -1], A \= B, A \= C; 
-	P = [-1, -1], A \= C, A \= B; 
-	P = [-1, -1], B \= C, B \= A;
-	P = [-1, -1], A \= B, A \= C, B \= C.
-
 posicaoParaVitoria([_,_,Z],   [_,_,Z],   [L,C,'-'], J, P) :- Z = J, P = [L,C].
 posicaoParaVitoria([_,_,Z],   [L,C,'-'], [_,_,Z],   J, P) :- Z = J, P = [L,C].
 posicaoParaVitoria([L,C,'-'], [_,_,Z],   [_,_,Z],   J, P) :- Z = J, P = [L,C].
 
 posicaoVencedor([], false).
 posicaoVencedor([[Linha, Coluna]|T], [L, C]) :- 
-	Linha \= -1, Coluna \= -1, L = Linha, C = Coluna; 
+	Linha \= -1, Coluna \= -1, L = Linha, C = Coluna ; 
 	posicaoVencedor(T, [L, C]).
 
 /* --------------------------------------- menus --------------------------------------- */
@@ -177,13 +169,11 @@ situacao(_, "RunBarryRun").
 
 processaEntrada("menu 1", Jogador, Tabuleiro, TabAtualizado) :- 
 	direcoesComPosicoes(Tabuleiro, Direcoes),
-%	findall(X, (nth1(I,List,Y), (I == Position -> X = Element ; X = Y)), Result)
-	findall(X, (nth1(Col,Direcao,[A,B,C]), (posicaoParaVitoria(A, B, C, Jogador, X) ; X = [-1, -1])), PosicoesParaVitoria),
-	writeln(PosicoesParaVitoria).
-%	posicaoVencedor(PosicoesParaVitoria, [Linha, Coluna]),
-%	insereNoTabuleiro(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado);
-%	writeln("    Menu 1 temporariamente indisponível."),
-%	jogadorJoga(Tabuleiro, Jogador, TabAtualizado).
+	findall(X, (nth1(Col,Direcoes,[A,B,C]), (posicaoParaVitoria(A, B, C, Jogador, R) -> X = R ; X = [-1, -1])), PosicoesParaVitoria),
+	posicaoVencedor(PosicoesParaVitoria, [Linha, Coluna]),
+	insereNoTabuleiro(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado) ;
+	writeln("    Menu 1 temporariamente indisponível."),
+	jogadorJoga(Tabuleiro, Jogador, TabAtualizado).
 
 processaEntrada("menu 2", Jogador, Tabuleiro, TabAtualizado) :- 
 	writeln("Menu 2"),
@@ -260,7 +250,7 @@ turnoJogador(Tabuleiro, Jogador, _, Resultado) :-
 
 /* --------------------------------------- jogador --------------------------------------- */
 
-% :- initialization(main).
+ :- initialization(main).
 
 main :-
   tabuleiroVazio(Tabuleiro),
