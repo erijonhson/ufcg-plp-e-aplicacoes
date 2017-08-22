@@ -117,7 +117,6 @@ imprimeLinha([H|T]) :- write(H), write('   '), imprimeLinha(T).
 
 imprimeTabuleiro(_, []).
 imprimeTabuleiro(N, [H|T]) :- 
-	write(N), write('   '),
 	imprimeLinha(H), writeln(''), 
 	N1 is N + 1, 
 	imprimeTabuleiro(N1, T).
@@ -152,7 +151,8 @@ posicaoParaVitoria([L,C,'-'], [_,_,Z],   [_,_,Z],   J, P) :- Z = J, P = [L,C].
 
 posicaoVencedor([], false).
 posicaoVencedor([[Linha, Coluna]|T], [L, C]) :- 
-	Linha \= -1, Coluna \= -1, L = Linha, C = Coluna ; 
+	Linha \= -1, Coluna \= -1, L = Linha, C = Coluna 
+	; 
 	posicaoVencedor(T, [L, C]).
 
 /* --------------------------------------- menus --------------------------------------- */
@@ -169,20 +169,34 @@ situacao(_, "RunBarryRun").
 
 processaEntrada("menu 1", Jogador, Tabuleiro, TabAtualizado) :- 
 	direcoesComPosicoes(Tabuleiro, Direcoes),
-	findall(X, (nth1(Col,Direcoes,[A,B,C]), (posicaoParaVitoria(A, B, C, Jogador, R) -> X = R ; X = [-1, -1])), PosicoesParaVitoria),
-	posicaoVencedor(PosicoesParaVitoria, [Linha, Coluna]),
-	insereNoTabuleiro(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado) ;
-	writeln("    Menu 1 temporariamente indisponível."),
-	jogadorJoga(Tabuleiro, Jogador, TabAtualizado).
+	findall(
+		X, 
+		(nth1(_,Direcoes,[A,B,C]), (posicaoParaVitoria(A, B, C, Jogador, R) -> X = R ; X = [-1, -1])), 
+		PosicoesParaVitoria), 
+		!, % corte a busca
+	(
+		posicaoVencedor(PosicoesParaVitoria, [Linha, Coluna]) 
+		; 
+		writeln("    Menu 1 temporariamente indisponível."), 
+		TabAtualizado = false
+	),
+	insereNoTabuleiro(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado).
 
 processaEntrada("menu 2", Jogador, Tabuleiro, TabAtualizado) :- 
-	direcoesComPosicoes(Tabuleiro, Direcoes),
 	oponente(Jogador, Oponente),
-	findall(X, (nth1(Col,Direcoes,[A,B,C]), (posicaoParaVitoria(A, B, C, Oponente, R) -> X = R ; X = [-1, -1])), PosicoesParaVitoria),
-	posicaoVencedor(PosicoesParaVitoria, [Linha, Coluna]),
-	insereNoTabuleiro(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado) ;
-	writeln("    Menu 2 temporariamente indisponível."),
-	jogadorJoga(Tabuleiro, Jogador, TabAtualizado).
+	direcoesComPosicoes(Tabuleiro, Direcoes),
+	findall(
+		X, 
+		(nth1(_,Direcoes,[A,B,C]), (posicaoParaVitoria(A, B, C, Oponente, R) -> X = R ; X = [-1, -1])), 
+		PosicoesParaVitoria), 
+		!, % corte a busca
+	(
+		posicaoVencedor(PosicoesParaVitoria, [Linha, Coluna]) 
+		; 
+		writeln("    Menu 2 temporariamente indisponível."), 
+		TabAtualizado = false
+	),
+	insereNoTabuleiro(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado).
 
 processaEntrada("menu 3", Jogador, Tabuleiro, TabAtualizado) :- 
 	writeln("Menu 3"),
@@ -204,18 +218,22 @@ espacoOcupado(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado) :-
 	processaEntrada(Jogador, Tabuleiro, TabAtualizado).
 
 processaEntrada([Linha, Coluna|[]], Jogador, Tabuleiro, TabAtualizado) :- 
-	espacoOcupado(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado);
+	espacoOcupado(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado)
+	;
 	insereNoTabuleiro(Linha, Coluna, Jogador, Tabuleiro, TabAtualizado).
 
 processaEntrada(_, Jogador, Tabuleiro, TabAtualizado) :- 
-	writeln("   INVÁLIDO! Padrão: [lin, col]. ou [menu X]."),
+	writeln("   INVÁLIDO! Padrão: [lin, col]. ou \"menu X\"."),
 	writeln("      [1, 1].\n      [2, 3].\n      \"menu 5\"."),
 	processaEntrada(Jogador, Tabuleiro, TabAtualizado).
 
 processaEntrada(Jogador, Tabuleiro, TabAtualizado) :- 
 	write("Joga "), write(Jogador), write(" [lin,col]. ou \"menu X\".: "),
 	read(Entrada),
-	processaEntrada(Entrada, Jogador, Tabuleiro, TabAtualizado).
+	processaEntrada(Entrada, Jogador, Tabuleiro, TabAtualizado) 
+	; 
+	write("Aqui: "), writeln(TabAtualizado),
+	processaEntrada(Jogador, Tabuleiro, TabAtualizado).
 
 jogadorJoga(Tabuleiro, Jogador, TabAtualizado) :- 
 	imprimeMenu,
@@ -230,11 +248,13 @@ vitoria(C1, C2, C3, Jogador, Result) :-
 
 verificaVencedor([], _, false).
 verificaVencedor([[[_,_,C1], [_,_,C2], [_,_,C3]]|T], Jogador, Result) :- 
-	vitoria(C1, C2, C3, Jogador, Temp), Result = Temp;
+	vitoria(C1, C2, C3, Jogador, Temp), Result = Temp
+	;
 	verificaVencedor(T, Jogador, Result).
 
 verificaVitoria(Direcoes, Jogador, Result) :- 
-	empate(Direcoes, Result);
+	empate(Direcoes, Result)
+	;
 	verificaVencedor(Direcoes, Jogador, Result).
 
 turnoJogador(Tabuleiro, _, 'X', "Parabens, jogador X! Voce venceu!") :- 
